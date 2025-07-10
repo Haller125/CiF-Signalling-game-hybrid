@@ -1,13 +1,13 @@
+from dataclasses import dataclass, field
+
+from src.belief.BeliefStore import BeliefStore
 from src.predicates.Predicate import Predicate
 
-
+@dataclass
 class NPC:
-    def __init__(self, id: int, name: str):
-        self.id = id
-        self.name = name
-        # self.belief_store = belief_store
-        # self.goals = goals
-        # self.utility_preferences = utility_preferences
+    id: int
+    name: str
+    # beliefs: BeliefStore = field(default_factory=BeliefStore)
 
     def __str__(self):
         return f"{self.name} (ID: {self.id})"
@@ -15,6 +15,4 @@ class NPC:
     def desire_formation(self):
         pass
 
-    def add_trait(self, predicate: Predicate, value: bool):
-        self.traits[predicate] = value
 

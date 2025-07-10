@@ -1,7 +1,12 @@
-from src.predicates.Predicate import Predicate
+from dataclasses import dataclass
 
+from src.predicates.Predicate import Predicate
+from src.predicates.PredicateTemplate import PredicateTemplate
+
+
+@dataclass
 class Belief:
-    def __init__(self, predicate: Predicate, probability: float):
-        self.predicate = predicate
-        self.probability = probability
+    predicate: Predicate
+    probability: float
+    predicate_template: PredicateTemplate
 

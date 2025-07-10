@@ -2,7 +2,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Callable, Iterable, List, Optional, Sequence
 
-from src.predicates.Condition import ICondition
+from src.predicates.Condition import ICondition, HasCondition
 from src.predicates.Effect import IEffect
 from src.predicates.WorldState import WorldState
 from src.types.NPCTypes import NPCType
@@ -11,7 +11,7 @@ from src.types.NPCTypes import NPCType
 @dataclass(slots=True)
 class Rule:
     name: str
-    condition: Sequence[ICondition]
+    condition: Sequence[HasCondition]
     weight: Optional[float] = None
     effects: Sequence[IEffect] = field(default_factory=list)
 

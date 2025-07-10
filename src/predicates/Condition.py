@@ -21,9 +21,9 @@ class HasCondition(ICondition):
     def __call__(self, state: WorldState, i: NPCType, r: NPCType = None) -> bool:
         if not self.req_predicates:
             logging.error("Condition is empty.")
-            return False
-        for predicate in self.req_predicates:
-            pred: Predicate = predicate.instantiate(subject=i, target=r) if not predicate.is_single else predicate.instantiate(subject=i)
+            return True
+        for predicate_temp in self.req_predicates:
+            pred: Predicate = predicate_temp.instantiate(subject=i, target=r) if not predicate_temp.is_single else predicate_temp.instantiate(subject=i)
             if pred not in state.predicates:
                 logging.debug(f"Condition failed for predicate {pred}.")
                 return False
