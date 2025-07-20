@@ -17,6 +17,10 @@ class PredicateTemplate:
             subtype=self.subtype,
             subject=subject,
             target=target,
+<<<<<<< HEAD
             value=self.value,
             is_single=self.is_single
+=======
+            value=self.value
+>>>>>>> f439887604a3b3fa26c65f531b08aaf0c2384863
         )

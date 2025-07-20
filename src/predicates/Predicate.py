@@ -21,6 +21,12 @@ class Predicate:
     def __str__(self):
         return f"{self.pred_type}({self.subject}, {self.target if self.target else 'None'}, {self.value})"
 
+<<<<<<< HEAD
+=======
+    def __hash__(self):
+        return hash((self.pred_type, self.subtype, self.subject.id, self.target.id if self.target else None, self.value))
+
+>>>>>>> f439887604a3b3fa26c65f531b08aaf0c2384863
     def __repr__(self):
         return f"Predicate(pred_type={self.pred_type}, subtype={self.subtype}, subject={self.subject.name}, target={self.target.name if self.target else None}, value={self.value})"
 
@@ -31,9 +37,13 @@ class Predicate:
                 self.subtype == other.subtype and
                 self.subject.id == other.subject.id and
                 (self.target.id if self.target else None) == (other.target.id if other.target else None) and
+<<<<<<< HEAD
                 self.value == other.value)
 
     def matches_template(self, temp: PredicateTemplate):
         return (self.pred_type == temp.pred_type and
                 self.subtype == temp.subtype and
                 self.is_single == temp.is_single)
+=======
+                self.value == other.value)
+>>>>>>> f439887604a3b3fa26c65f531b08aaf0c2384863
