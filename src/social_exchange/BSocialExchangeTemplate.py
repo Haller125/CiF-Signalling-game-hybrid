@@ -1,26 +1,27 @@
 from dataclasses import dataclass
 from typing import Sequence
 
-from src.irs.IRS import InfluenceRuleSet
-from src.predicates.Condition import HasCondition, ICondition
+from src.irs.BIRS import BInfluenceRuleSet
+from src.predicates.BCondition import IBCondition
 from src.predicates.PredicateTemplate import PredicateTemplate
-from src.social_exchange.ExchangeEffects import ExchangeEffects
-from src.social_exchange.SocialExchange import SocialExchange
+from src.social_exchange.BExchangeEffects import BExchangeEffects
+from src.social_exchange.BSocialExchange import BSocialExchange
 from src.types.NPCTypes import NPCType
 
-@dataclass
-class SocialExchangeTemplate:
-    name: str
-    preconditions: Sequence[ICondition]
-    intent: PredicateTemplate
-    initiator_irs: InfluenceRuleSet
-    responder_irs: InfluenceRuleSet
-    effects: ExchangeEffects
 
-    def instantiate(self, initiator: NPCType, responder: NPCType) -> SocialExchange:
+@dataclass
+class BSocialExchangeTemplate:
+    name: str
+    preconditions: Sequence[IBCondition]
+    intent: PredicateTemplate
+    initiator_irs: BInfluenceRuleSet
+    responder_irs: BInfluenceRuleSet
+    effects: BExchangeEffects
+
+    def instantiate(self, initiator: NPCType, responder: NPCType) -> BSocialExchange:
         intent = self.intent.instantiate(subject=initiator, target=responder)
 
-        return SocialExchange(
+        return BSocialExchange(
             name=self.name,
             initiator=initiator,
             responder=responder,

@@ -1,7 +1,9 @@
 from dataclasses import dataclass, field
 from typing import List, Dict
 
+from src.belief.BeliefStore import BeliefStore
 from src.predicates.WorldState import WorldState
+from src.rule.BRule import BRule
 from src.rule.Rule import Rule
 from src.types.NPCTypes import NPCType
 
@@ -24,3 +26,4 @@ class InfluenceRuleSet:
     def accept_or_reject(self, state: WorldState, i: NPCType, r: NPCType = None,
                          threshold: float = 0.0) -> bool:
         return self.score(state, i, r) >= threshold
+
