@@ -22,6 +22,7 @@ class BSocialExchange:
     initiator_irs: BInfluenceRuleSet
     responder_irs: BInfluenceRuleSet
     effects: BExchangeEffects
+    is_accepted: bool = None
 
     def is_playable(self, state: BeliefStore) -> bool:
         return all(cond(state, self.initiator, self.responder) for cond in self.preconditions)
@@ -30,7 +31,7 @@ class BSocialExchange:
         return self.initiator_irs.score(state, self.initiator, self.responder)
 
     def responder_accepts(self, state: BeliefStore, threshold: float = 0.0) -> bool:
-        return self.responder_irs.accept_or_reject(state, self.initiator, self.responder, threshold)
+        return self.responder_irs.accept_or_reject(state, self.responder, self.initiator, threshold)
 
     def perform(self, state: BeliefStore) -> None:
         if not self.is_playable(state):
@@ -38,5 +39,7 @@ class BSocialExchange:
 
         if self.responder_accepts(state):
             self.effects.accept(state, self.initiator, self.responder)
+            self.is_accepted = True
         else:
             self.effects.reject(state, self.initiator, self.responder)
+            self.is_accepted = False

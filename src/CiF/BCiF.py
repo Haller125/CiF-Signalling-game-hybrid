@@ -3,6 +3,7 @@ from typing import List, Optional
 
 from src.desire_formation import bdesire_formation
 from src.select_intent.bselect_intent import bselect_intent
+from src.signal_interpolation.SignalInterpolation import update_beliefs_from_observation
 from src.social_exchange.BSocialExchange import BSocialExchange
 from src.social_exchange.BSocialExchangeTemplate import BSocialExchangeTemplate
 from src.social_exchange.SocialExchange import SocialExchange
@@ -18,14 +19,16 @@ class BCiF:
     actions: List[BSocialExchangeTemplate]
     desire_formation: Optional[BDesireFormationType] = bdesire_formation
     select_intent: Optional[SelectIntentType] = bselect_intent
+    signal_interpolation = update_beliefs_from_observation
 
     def iteration(self):
-        volitions = [[
-            npc, self.desire_formation(npc, self.NPCs, npc.beliefStore, self.actions)
-        ] for npc in self.NPCs]
+        actions_done: List[BSocialExchange] = []
 
-        actions: List[List[NPCType, BSocialExchange]] = [[npc, self.select_intent(volitiones, 0)] for npc, volitiones in
-                                                        volitions]
-        for npc, action in actions:
+        for npc in self.NPCs:
+            action = npc.iteration(self.NPCs, self.actions)
+
             if action is not None:
-                npc.perform_action(action)
+                actions_done.append(action)
+
+        for npc in self.NPCs:
+            npc.update_beliefs_from_observation(actions_done)

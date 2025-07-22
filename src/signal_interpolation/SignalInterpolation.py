@@ -2,11 +2,11 @@ from dataclasses import dataclass
 
 from src.predicates.Condition import HasCondition
 from src.signal_interpolation.EstimateLikelihood import estimate_likelihood
-from src.social_exchange.SocialExchange import SocialExchange
+from src.social_exchange.BSocialExchange import BSocialExchange
 from src.types.NPCTypes import BNPCType
 
 
-def update_beliefs_from_observation(observer: BNPCType, exchange: SocialExchange, accepted: bool):
+def update_beliefs_from_observation(observer: BNPCType, exchange: BSocialExchange, accepted: bool):
     i = exchange.initiator
     r = exchange.responder
 
