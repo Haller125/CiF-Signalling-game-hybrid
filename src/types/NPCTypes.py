@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Protocol, Sequence, List, Callable, Optional
+from typing import Protocol, Sequence, List, Optional
+
 from src.belief.BeliefStore import BeliefStore
 from src.desire_formation.BVolition import BVolition
 from src.social_exchange.BSocialExchange import BSocialExchange
@@ -11,6 +12,7 @@ class NPCType(Protocol):
     id: int
     name: str
 
+
 class BNPCType(Protocol):
     id: int
     name: str
@@ -19,7 +21,8 @@ class BNPCType(Protocol):
     def perform_action(self, action: BSocialExchange):
         raise NotImplementedError
 
-    def desire_formation(self, targets: Sequence[BNPCType], actions_templates: Sequence[BSocialExchangeTemplate]) ->List[BVolition]:
+    def desire_formation(self, targets: Sequence[BNPCType], actions_templates: Sequence[BSocialExchangeTemplate]) -> \
+    List[BVolition]:
         raise NotImplementedError
 
     def select_intent(self, volitions: Sequence[BVolition], threshold: float = 0.0) -> Optional[BSocialExchange]:

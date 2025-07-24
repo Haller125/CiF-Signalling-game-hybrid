@@ -2,15 +2,13 @@ from typing import Iterable, Sequence, List
 
 from src.belief.BeliefStore import BeliefStore
 from src.desire_formation.BVolition import BVolition
-from src.desire_formation.Volition import Volition
 from src.social_exchange.BSocialExchangeTemplate import BSocialExchangeTemplate
-from src.social_exchange.SocialExchangeTemplate import SocialExchangeTemplate
-from src.types.NPCTypes import NPCType
+from src.types.NPCTypes import NPCType, BNPCType
 
 
 def desire_formation(
-    initiator: NPCType,
-    others: Iterable[NPCType],
+    initiator: BNPCType,
+    others: Iterable[BNPCType],
     state: BeliefStore,
     actions: Sequence[BSocialExchangeTemplate],
 ) -> List[BVolition]:

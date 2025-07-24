@@ -1,7 +1,6 @@
 from dataclasses import dataclass
-from typing import Callable, List
+from typing import List
 
-from src.predicates.Predicate import Predicate
 from src.predicates.PredicateTemplate import PredicateTemplate
 from src.predicates.WorldState import WorldState
 from src.types.NPCTypes import NPCType

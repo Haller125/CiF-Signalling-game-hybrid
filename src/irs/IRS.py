@@ -1,9 +1,7 @@
 from dataclasses import dataclass, field
-from typing import List, Dict
+from typing import List
 
-from src.belief.BeliefStore import BeliefStore
 from src.predicates.WorldState import WorldState
-from src.rule.BRule import BRule
 from src.rule.Rule import Rule
 from src.types.NPCTypes import NPCType
 

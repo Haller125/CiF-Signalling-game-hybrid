@@ -8,8 +8,7 @@ from src.types.NPCTypes import NPCType
 class PredicateTemplate:
     pred_type: str  # "trait", "relationship" etc.
     subtype: str  # "trust", "friendship", "kind", "evil" etc.
-    is_single: bool # whether the predicate is single (applies to one NPC) or relational (applies to two NPCs)
-    value: float = 1  # the value of the predicate (e.g., trust level, friendship level, evilness level)
+    is_single: bool  # whether the predicate is single (applies to one NPC) or relational (applies to two NPCs)
 
     def instantiate(self, subject: NPCType, target: NPCType = None):
         return Predicate(
@@ -17,10 +16,6 @@ class PredicateTemplate:
             subtype=self.subtype,
             subject=subject,
             target=target,
-<<<<<<< HEAD
-            value=self.value,
-            is_single=self.is_single
-=======
-            value=self.value
->>>>>>> f439887604a3b3fa26c65f531b08aaf0c2384863
+            is_single=self.is_single,
+            template=self,
         )

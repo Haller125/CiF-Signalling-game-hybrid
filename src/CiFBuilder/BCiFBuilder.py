@@ -6,7 +6,6 @@ from src.CiF.BCiF import BCiF
 from src.names.names import Names
 from src.npc.BNPC import BNPC
 from src.social_exchange.BSocialExchangeTemplate import BSocialExchangeTemplate
-from src.social_exchange.SocialExchangeTemplate import SocialExchangeTemplate
 
 
 @dataclass

@@ -2,11 +2,12 @@ from dataclasses import dataclass
 from typing import Sequence
 
 from src.irs.IRS import InfluenceRuleSet
-from src.predicates.Condition import HasCondition, ICondition
+from src.predicates.Condition import ICondition
 from src.predicates.PredicateTemplate import PredicateTemplate
 from src.social_exchange.ExchangeEffects import ExchangeEffects
 from src.social_exchange.SocialExchange import SocialExchange
 from src.types.NPCTypes import NPCType
+
 
 @dataclass
 class SocialExchangeTemplate:

@@ -1,13 +1,13 @@
 import logging
+import math
 from dataclasses import dataclass, field
-from typing import Callable, Iterable, List, Optional, Sequence
+from typing import Optional, Sequence
 
 from src.belief.BeliefStore import BeliefStore
 from src.predicates.BCondition import BHasCondition
-from src.predicates.Condition import ICondition, HasCondition
 from src.predicates.Effect import IEffect
-from src.predicates.WorldState import WorldState
-from src.types.NPCTypes import NPCType
+from src.types.NPCTypes import NPCType, BNPCType
+
 
 @dataclass(slots=True)
 class BRule:
@@ -28,7 +28,13 @@ class BRule:
             return 0.0
         return self.weight if self.is_true(state, i, r) else 0.0
 
-    def fire(self, state: BeliefStore, i: NPCType, r: NPCType = None) -> None:
-        if self.effects and self.is_true(state, i, r):
-            for eff in self.effects:
-                eff(state, i, r)
+    def probability(self, beliefs: BeliefStore, i: BNPCType, r: BNPCType = None) -> float:
+        if not self.condition:
+            raise ValueError(f"Rule '{self.name}' has no conditions.")
+
+        cond_probs = [float(cond(beliefs, i, r)) for cond in self.condition]
+        if any(p < 0 or p > 1 for p in cond_probs):
+            raise ValueError("Condition probabilities must be within [0,1].")
+
+        prob = math.prod(cond_probs)
+        return prob

@@ -6,10 +6,8 @@ from src.select_intent.bselect_intent import bselect_intent
 from src.signal_interpolation.SignalInterpolation import update_beliefs_from_observation
 from src.social_exchange.BSocialExchange import BSocialExchange
 from src.social_exchange.BSocialExchangeTemplate import BSocialExchangeTemplate
-from src.social_exchange.SocialExchange import SocialExchange
-from src.social_exchange.SocialExchangeTemplate import SocialExchangeTemplate
-from src.types.DesireFormationTypes import DesireFormationType, BDesireFormationType
-from src.types.NPCTypes import NPCType, BNPCType
+from src.types.DesireFormationTypes import BDesireFormationType
+from src.types.NPCTypes import BNPCType
 from src.types.SelectIntentTypes import SelectIntentType
 
 

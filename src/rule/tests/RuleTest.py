@@ -2,8 +2,8 @@ import unittest
 from typing import List
 
 from src.npc.NPC import NPC
-from src.predicates.Condition import Condition
-from src.predicates.Effect import Effect
+from src.predicates.Condition import ICondition
+from src.predicates.Effect import IEffect
 from src.predicates.Predicate import Predicate
 from src.predicates.WorldState import WorldState
 from src.rule.Rule import Rule

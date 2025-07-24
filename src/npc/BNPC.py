@@ -7,7 +7,7 @@ from src.desire_formation.BVolition import BVolition
 from src.signal_interpolation.SignalInterpolation import update_beliefs_from_observation
 from src.social_exchange.BSocialExchange import BSocialExchange
 from src.social_exchange.BSocialExchangeTemplate import BSocialExchangeTemplate
-from src.types.NPCTypes import BNPCType, NPCType
+from src.types.NPCTypes import BNPCType
 
 
 @dataclass
@@ -22,7 +22,8 @@ class BNPC(BNPCType):
     def perform_action(self, action: BSocialExchange):
         action.perform(self.beliefStore)
 
-    def desire_formation(self, targets: Sequence[BNPCType], actions_templates: Sequence[BSocialExchangeTemplate]) -> List[BVolition]:
+    def desire_formation(self, targets: Sequence[BNPCType], actions_templates: Sequence[BSocialExchangeTemplate]) -> \
+    List[BVolition]:
         volitions: List[BVolition] = []
 
         for r in targets:
@@ -35,7 +36,7 @@ class BNPC(BNPCType):
                 if not exch.is_playable(self.beliefStore):
                     continue
 
-                score = exch.initiator_score(self.beliefStore)
+                score = exch.initiator_probability(self.beliefStore) - exch.responder_probability(self.beliefStore)
                 volitions.append(BVolition(exch, score))
 
         volitions.sort(key=lambda t: t.score, reverse=True)
@@ -70,4 +71,10 @@ class BNPC(BNPCType):
 
         return action
 
+    def estimate_belief_about(self, other: BNPCType) -> BeliefStore:
+        beliefs_from_other_perspective_list = [belief for belief in self.beliefStore
+                                               if belief.predicate.subject == other]
 
+        beliefs_from_other_perspective = BeliefStore(beliefs=beliefs_from_other_perspective_list)
+
+        return beliefs_from_other_perspective

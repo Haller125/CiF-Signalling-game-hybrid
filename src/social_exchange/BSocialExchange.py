@@ -3,20 +3,17 @@ from typing import Sequence
 
 from src.belief.BeliefStore import BeliefStore
 from src.irs.BIRS import BInfluenceRuleSet
-from src.irs.IRS import InfluenceRuleSet
 from src.predicates.BCondition import IBCondition
-from src.predicates.Condition import ICondition
 from src.predicates.Predicate import Predicate
-from src.predicates.WorldState import WorldState
 from src.social_exchange.BExchangeEffects import BExchangeEffects
-from src.social_exchange.ExchangeEffects import ExchangeEffects
-from src.types.NPCTypes import NPCType
+from src.types.NPCTypes import BNPCType
+
 
 @dataclass(slots=True)
 class BSocialExchange:
     name: str
-    initiator: NPCType
-    responder: NPCType
+    initiator: BNPCType
+    responder: BNPCType
     intent: Predicate
     preconditions: Sequence[IBCondition]
     initiator_irs: BInfluenceRuleSet
@@ -28,10 +25,16 @@ class BSocialExchange:
         return all(cond(state, self.initiator, self.responder) for cond in self.preconditions)
 
     def initiator_score(self, state: BeliefStore) -> float:
-        return self.initiator_irs.score(state, self.initiator, self.responder)
+        return self.initiator_irs.expected_value(state, self.initiator, self.responder)
+
+    def initiator_probability(self, state: BeliefStore) -> float:
+        return self.initiator_irs.acceptance_probability(state, self.initiator, self.responder)
+
+    def responder_probability(self, state: BeliefStore) -> float:
+        return self.responder_irs.acceptance_probability(state, self.responder, self.initiator)
 
     def responder_accepts(self, state: BeliefStore, threshold: float = 0.0) -> bool:
-        return self.responder_irs.accept_or_reject(state, self.responder, self.initiator, threshold)
+        return self.responder_irs.acceptance_probability(state, self.responder, self.initiator, threshold) > 0.5
 
     def perform(self, state: BeliefStore) -> None:
         if not self.is_playable(state):

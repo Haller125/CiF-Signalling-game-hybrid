@@ -1,7 +1,5 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
-from src.belief.BeliefStore import BeliefStore
-from src.predicates.Predicate import Predicate
 
 @dataclass
 class NPC:

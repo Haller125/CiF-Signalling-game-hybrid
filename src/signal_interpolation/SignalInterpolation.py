@@ -1,6 +1,7 @@
-from dataclasses import dataclass
+from typing import List
 
 from src.predicates.Condition import HasCondition
+from src.predicates.PredicateTemplate import PredicateTemplate
 from src.signal_interpolation.EstimateLikelihood import estimate_likelihood
 from src.social_exchange.BSocialExchange import BSocialExchange
 from src.types.NPCTypes import BNPCType
@@ -10,13 +11,12 @@ def update_beliefs_from_observation(observer: BNPCType, exchange: BSocialExchang
     i = exchange.initiator
     r = exchange.responder
 
-    influencing_conditions_i = []
+    influencing_conditions_i: List[PredicateTemplate] = []
     for rule in exchange.initiator_irs.rules:
         if rule.weight is not None:
             for cond in rule.condition:
-                for p_template in cond.req_predicates:
-                    if p_template not in influencing_conditions_i:
-                        influencing_conditions_i.append(p_template)
+                if cond.req_predicate not in influencing_conditions_i:
+                    influencing_conditions_i.append(cond.req_predicate)
 
     for cond in influencing_conditions_i:
         if isinstance(cond, HasCondition):
@@ -40,9 +40,8 @@ def update_beliefs_from_observation(observer: BNPCType, exchange: BSocialExchang
     for rule in exchange.responder_irs.rules:
         if rule.weight is not None:
             for cond in rule.condition:
-                for p_template in cond.req_predicates:
-                    if p_template not in influencing_conditions_r:
-                        influencing_conditions_r.append(p_template)
+                if cond.req_predicate not in influencing_conditions_r:
+                    influencing_conditions_r.append(cond.req_predicate)
 
     for cond in influencing_conditions_r:
         if isinstance(cond, HasCondition):

@@ -1,11 +1,10 @@
+import logging
 from dataclasses import dataclass
-from typing import Callable, Sequence
+from typing import Sequence
 
 from src.predicates.Predicate import Predicate
 from src.predicates.PredicateTemplate import PredicateTemplate
 from src.predicates.WorldState import WorldState
-import logging
-
 from src.types.NPCTypes import NPCType
 
 

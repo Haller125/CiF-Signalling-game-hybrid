@@ -14,20 +14,14 @@ class IBCondition:
     def __call__(self, state: BeliefStore, i, r=None) -> bool:
         raise NotImplementedError("Subclasses should implement this method.")
 
-    def __str__(self):
-        return f"IBCondition(req_predicates={self.req_predicates}, threshold={self.threshold})"
-
 
 @dataclass
 class BHasCondition(ICondition):
-    req_predicates: List[PredicateTemplate]
+    req_predicate: PredicateTemplate
     threshold: float = 0.0
 
-    def __call__(self, state: BeliefStore, i, r=None) -> bool:
-        if not self.req_predicates:
+    def __call__(self, state: BeliefStore, i, r=None) -> float:
+        if not self.req_predicate:
             logging.error("Condition is empty.")
             return True
-        cumulative_prob = 0.0
-        for predicate_temp in self.req_predicates:
-            cumulative_prob += state.get_probability(predicate_temp, i, r)
-        return (cumulative_prob / len(self.req_predicates)) >= self.threshold
+        return state.get_probability(self.req_predicate, i, r)

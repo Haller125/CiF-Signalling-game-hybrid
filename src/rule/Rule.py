@@ -1,9 +1,8 @@
 import logging
 from dataclasses import dataclass, field
-from typing import Callable, Iterable, List, Optional, Sequence
+from typing import Optional, Sequence
 
-from src.belief.BeliefStore import BeliefStore
-from src.predicates.Condition import ICondition, HasCondition
+from src.predicates.Condition import HasCondition
 from src.predicates.Effect import IEffect
 from src.predicates.WorldState import WorldState
 from src.types.NPCTypes import NPCType
