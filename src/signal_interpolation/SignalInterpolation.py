@@ -1,6 +1,6 @@
 from typing import List
 
-from src.predicates.Condition import HasCondition
+from src.predicates.BCondition import BHasCondition
 from src.predicates.PredicateTemplate import PredicateTemplate
 from src.signal_interpolation.EstimateLikelihood import estimate_likelihood
 from src.social_exchange.BSocialExchange import BSocialExchange
@@ -19,22 +19,22 @@ def update_beliefs_from_observation(observer: BNPCType, exchange: BSocialExchang
                     influencing_conditions_i.append(cond.req_predicate)
 
     for cond in influencing_conditions_i:
-        if isinstance(cond, HasCondition):
-            for p_template in cond.req_predicates:
-                pred = p_template.instantiate(subject=i, target=r)
+        if isinstance(cond, BHasCondition):
+            p_template = cond.req_predicate
+            pred = p_template.instantiate(subject=i, target=r)
 
-                p_obs_given_true = estimate_likelihood(exchange.initiator_irs, predicate=p_template, pred_true=True, accepted=accepted)
-                p_obs_given_false = estimate_likelihood(exchange.initiator_irs, predicate=p_template, pred_true=False, accepted=accepted)
+            p_obs_given_true = estimate_likelihood(exchange.initiator_irs, predicate=p_template, pred_true=True, accepted=accepted)
+            p_obs_given_false = estimate_likelihood(exchange.initiator_irs, predicate=p_template, pred_true=False, accepted=accepted)
 
-                prior_prob = observer.beliefStore.get_probability(pred, i, r)
-                numerator = p_obs_given_true * prior_prob
+            prior_prob = observer.beliefStore.get_probability(pred, i, r)
+            numerator = p_obs_given_true * prior_prob
 
-                denominator = numerator + p_obs_given_false * (1 - prior_prob)
-                if denominator == 0:
-                    continue
-                posterior_prob = numerator / denominator
+            denominator = numerator + p_obs_given_false * (1 - prior_prob)
+            if denominator == 0:
+                continue
+            posterior_prob = numerator / denominator
 
-                observer.beliefStore.update(pred, posterior_prob)
+            observer.beliefStore.update(pred, posterior_prob)
 
     influencing_conditions_r = []
     for rule in exchange.responder_irs.rules:
@@ -44,19 +44,19 @@ def update_beliefs_from_observation(observer: BNPCType, exchange: BSocialExchang
                     influencing_conditions_r.append(cond.req_predicate)
 
     for cond in influencing_conditions_r:
-        if isinstance(cond, HasCondition):
-            for p_template in cond.req_predicates:
-                pred = p_template.instantiate(subject=r, target=i)
+        if isinstance(cond, BHasCondition):
+            p_template = cond.req_predicate
+            pred = p_template.instantiate(subject=r, target=i)
 
-                p_obs_given_true = estimate_likelihood(exchange.responder_irs, predicate=p_template, pred_true=True, accepted=accepted)
-                p_obs_given_false = estimate_likelihood(exchange.responder_irs, predicate=p_template, pred_true=False, accepted=accepted)
+            p_obs_given_true = estimate_likelihood(exchange.responder_irs, predicate=p_template, pred_true=True, accepted=accepted)
+            p_obs_given_false = estimate_likelihood(exchange.responder_irs, predicate=p_template, pred_true=False, accepted=accepted)
 
-                prior_prob = observer.beliefStore.get_probability(pred, r, i)
-                numerator = p_obs_given_true * prior_prob
+            prior_prob = observer.beliefStore.get_probability(pred, r, i)
+            numerator = p_obs_given_true * prior_prob
 
-                denominator = numerator + p_obs_given_false * (1 - prior_prob)
-                if denominator == 0:
-                    continue
-                posterior_prob = numerator / denominator
+            denominator = numerator + p_obs_given_false * (1 - prior_prob)
+            if denominator == 0:
+                continue
+            posterior_prob = numerator / denominator
 
-                observer.beliefStore.update(pred, posterior_prob)
+            observer.beliefStore.update(pred, posterior_prob)

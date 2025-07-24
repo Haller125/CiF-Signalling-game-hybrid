@@ -5,7 +5,7 @@ from typing import Optional, Sequence
 
 from src.belief.BeliefStore import BeliefStore
 from src.predicates.BCondition import BHasCondition
-from src.predicates.Effect import IEffect
+from src.predicates.BEffect import IBEffect
 from src.types.NPCTypes import NPCType, BNPCType
 
 
@@ -14,7 +14,7 @@ class BRule:
     name: str
     condition: Sequence[BHasCondition]
     weight: Optional[float] = None
-    effects: Sequence[IEffect] = field(default_factory=list)
+    effects: Sequence[IBEffect] = field(default_factory=list)
 
     def is_true(self, state: BeliefStore, i: NPCType, r: NPCType = None) -> bool:
         if not self.condition:

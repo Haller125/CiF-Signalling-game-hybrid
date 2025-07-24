@@ -1,22 +1,16 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List
 
-from src.desire_formation import bdesire_formation
-from src.select_intent.bselect_intent import bselect_intent
 from src.signal_interpolation.SignalInterpolation import update_beliefs_from_observation
 from src.social_exchange.BSocialExchange import BSocialExchange
 from src.social_exchange.BSocialExchangeTemplate import BSocialExchangeTemplate
-from src.types.DesireFormationTypes import BDesireFormationType
 from src.types.NPCTypes import BNPCType
-from src.types.SelectIntentTypes import SelectIntentType
 
 
 @dataclass
 class BCiF:
     NPCs: List[BNPCType]
     actions: List[BSocialExchangeTemplate]
-    desire_formation: Optional[BDesireFormationType] = bdesire_formation
-    select_intent: Optional[SelectIntentType] = bselect_intent
     signal_interpolation = update_beliefs_from_observation
 
     def iteration(self):

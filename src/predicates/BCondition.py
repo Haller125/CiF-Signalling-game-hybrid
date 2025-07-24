@@ -1,14 +1,12 @@
 import logging
 from dataclasses import dataclass
-from typing import List
 
 from src.belief.BeliefStore import BeliefStore
-from src.predicates.Condition import ICondition
 from src.predicates.PredicateTemplate import PredicateTemplate
 
 @dataclass
 class IBCondition:
-    req_predicates: List[PredicateTemplate]
+    req_predicate: PredicateTemplate
     threshold: float = 0.0
 
     def __call__(self, state: BeliefStore, i, r=None) -> bool:
@@ -16,7 +14,7 @@ class IBCondition:
 
 
 @dataclass
-class BHasCondition(ICondition):
+class BHasCondition(IBCondition):
     req_predicate: PredicateTemplate
     threshold: float = 0.0
 
