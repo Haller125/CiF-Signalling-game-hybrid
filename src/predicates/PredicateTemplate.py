@@ -10,7 +10,7 @@ class PredicateTemplate:
     subtype: str  # "trust", "friendship", "kind", "evil" etc.
     is_single: bool  # whether the predicate is single (applies to one NPC) or relational (applies to two NPCs)
 
-    def instantiate(self, subject: NPCType, target: NPCType = None):
+    def instantiate(self, subject: NPCType, target: NPCType = None) -> Predicate:
         return Predicate(
             pred_type=self.pred_type,
             subtype=self.subtype,

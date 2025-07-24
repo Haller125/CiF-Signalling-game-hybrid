@@ -1,13 +1,8 @@
 from dataclasses import dataclass
-import enum
 
 from src.predicates.PredicateTemplate import PredicateTemplate
 from src.types.NPCTypes import NPCType
 
-
-class PredicateVisibility(enum.Enum):
-    PRIVATE = 'private'
-    PUBLIC = 'public'
 
 @dataclass(frozen=True, slots=True)
 class Predicate:
@@ -17,12 +12,6 @@ class Predicate:
     is_single: bool
     template: PredicateTemplate
     target: NPCType = None    # second NPC (if applicable, e.g., in relationships)
-
-    def __str__(self):
-        return f"{self.pred_type}({self.subject}, {self.target if self.target else 'None'})"
-
-    def __repr__(self):
-        return f"Predicate(pred_type={self.pred_type}, subtype={self.subtype}, subject={self.subject.name}, target={self.target.name if self.target else None})"
 
     def __eq__(self, other):
         if not isinstance(other, Predicate):

@@ -16,7 +16,7 @@ class IBEffect:
 @dataclass
 class BAddPredicateEffect(IBEffect):
     predicates: List[PredicateTemplate]
-    probability: float = 0.5
+    probability: float = 0.9
 
     def __call__(self, state: BeliefStore, i: NPCType, r: NPCType) -> None:
         for predicate_template in self.predicates:

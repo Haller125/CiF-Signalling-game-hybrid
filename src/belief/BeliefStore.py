@@ -15,7 +15,7 @@ class BeliefStore:
         for belief in self.beliefs:
             if belief.predicate_template == predicate_temp and belief.predicate.subject == i and (belief.predicate.target == r or r is None):
                 return belief.probability
-        return 0.0
+        return 0.5
 
     def __iter__(self):
         return iter(self.beliefs)
@@ -34,3 +34,8 @@ class BeliefStore:
                 return
         new_belief = Belief(predicate=predicate, probability=probability, predicate_template=predicate.template)
         self.beliefs.append(new_belief)
+
+    def add_belief(self, predicate: Predicate, probability: float = 1.0):
+        if not isinstance(predicate, Predicate):
+            raise TypeError("Only Predicate instances can be added as traits.")
+        self.update(predicate, probability)

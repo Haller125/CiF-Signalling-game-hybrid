@@ -36,7 +36,7 @@ class BNPC(BNPCType):
                 if not exch.is_playable(self.beliefStore):
                     continue
 
-                score = exch.initiator_probability(self.beliefStore) - exch.responder_probability(self.beliefStore)
+                score = exch.initiator_probability(self.beliefStore) * exch.responder_probability(self.beliefStore)
                 volitions.append(BVolition(exch, score))
 
         volitions.sort(key=lambda t: t.score, reverse=True)

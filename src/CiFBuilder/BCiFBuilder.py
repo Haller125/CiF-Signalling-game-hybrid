@@ -1,3 +1,4 @@
+import itertools
 from dataclasses import dataclass, field
 from random import random
 from typing import List
@@ -5,7 +6,9 @@ from typing import List
 from src.CiF.BCiF import BCiF
 from src.names.names import Names
 from src.npc.BNPC import BNPC
+from src.predicates.PredicateTemplate import PredicateTemplate
 from src.social_exchange.BSocialExchangeTemplate import BSocialExchangeTemplate
+from src.types.NPCTypes import BNPCType
 
 
 @dataclass
@@ -25,18 +28,42 @@ class CiFBuilder:
             actions=self.exchanges
         )
 
-    def initialize_beliefs(self, npcs):
+    def initialize_beliefs(self, npcs: List[BNPCType]):
         for npc in npcs:
-            self.initialize_belief(npc)
+            self.initialize_traits(npc)
+
+        for npc1, npc2 in itertools.permutations(npcs, 2):
+            self.initialize_relationship(npc1, npc2)
 
         return npcs
 
-    def initialize_belief(self, npc):
+    def get_trait_templates(self):
+        templates: List[tuple[PredicateTemplate, float]] = []
+
         for trait, probability in self.traits:
-            if random() <= probability:
-                npc.beliefs.add_trait(trait)
+            template = PredicateTemplate(pred_type="trait", subtype=trait, is_single=True)
+            templates.append((template, probability))
+
+        return templates
+
+    def get_relationship_templates(self):
+        templates: List[tuple[PredicateTemplate, float]] = []
+
         for relationship, probability in self.relationships:
+            template = PredicateTemplate(pred_type="relationship", subtype=relationship, is_single=False)
+            templates.append((template, probability))
+
+        return templates
+
+    def initialize_traits(self, npc: BNPCType):
+        for trait, probability in self.get_trait_templates():
             if random() <= probability:
-                npc.beliefs.add_relationship(relationship)
+                npc.beliefStore.add_belief(trait.instantiate(subject=npc))
 
         return npc
+
+    def initialize_relationship(self, npc1: BNPCType, npc2: BNPCType):
+        for relationship, probability in self.get_relationship_templates():
+            if random() <= probability:
+                npc1.beliefStore.add_belief(relationship.instantiate(subject=npc1, target=npc2))
+

@@ -21,12 +21,12 @@ def update_beliefs_from_observation(observer: BNPCType, exchange: BSocialExchang
     for cond in influencing_conditions_i:
         if isinstance(cond, BHasCondition):
             p_template = cond.req_predicate
-            pred = p_template.instantiate(subject=i, target=r)
+            pred = p_template.instantiate(subject=i, target=r) if not p_template.is_single else p_template.instantiate(subject=i)
 
             p_obs_given_true = estimate_likelihood(exchange.initiator_irs, predicate=p_template, pred_true=True, accepted=accepted)
             p_obs_given_false = estimate_likelihood(exchange.initiator_irs, predicate=p_template, pred_true=False, accepted=accepted)
 
-            prior_prob = observer.beliefStore.get_probability(pred, i, r)
+            prior_prob = observer.beliefStore.get_probability(p_template, i, r)
             numerator = p_obs_given_true * prior_prob
 
             denominator = numerator + p_obs_given_false * (1 - prior_prob)
@@ -46,12 +46,12 @@ def update_beliefs_from_observation(observer: BNPCType, exchange: BSocialExchang
     for cond in influencing_conditions_r:
         if isinstance(cond, BHasCondition):
             p_template = cond.req_predicate
-            pred = p_template.instantiate(subject=r, target=i)
+            pred = p_template.instantiate(subject=r, target=i) if not p_template.is_single else p_template.instantiate(subject=r)
 
             p_obs_given_true = estimate_likelihood(exchange.responder_irs, predicate=p_template, pred_true=True, accepted=accepted)
             p_obs_given_false = estimate_likelihood(exchange.responder_irs, predicate=p_template, pred_true=False, accepted=accepted)
 
-            prior_prob = observer.beliefStore.get_probability(pred, r, i)
+            prior_prob = observer.beliefStore.get_probability(p_template, r, i)
             numerator = p_obs_given_true * prior_prob
 
             denominator = numerator + p_obs_given_false * (1 - prior_prob)
