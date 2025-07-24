@@ -1,17 +1,20 @@
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from src.predicates.PredicateTemplate import PredicateTemplate
-from src.types.NPCTypes import NPCType
+
+if TYPE_CHECKING:  # pragma: no cover
+    from src.types.NPCTypes import NPCType
 
 
 @dataclass(frozen=True, slots=True)
 class Predicate:
     pred_type: str        # "trait", "relationship" etc.
     subtype: str          # "trust", "friendship", "kind", "evil" etc.
-    subject: NPCType          # first NPC (itself)
+    subject: "NPCType"          # first NPC (itself)
     is_single: bool
     template: PredicateTemplate
-    target: NPCType = None    # second NPC (if applicable, e.g., in relationships)
+    target: "NPCType" = None    # second NPC (if applicable, e.g., in relationships)
 
     def __eq__(self, other):
         if not isinstance(other, Predicate):

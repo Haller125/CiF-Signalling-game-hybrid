@@ -1,17 +1,19 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, TYPE_CHECKING
 
 from src.belief.Belief import Belief
 from src.predicates.Predicate import Predicate
 from src.predicates.PredicateTemplate import PredicateTemplate
-from src.types.NPCTypes import NPCType
+
+if TYPE_CHECKING:  # pragma: no cover - used for type hints only
+    from src.types.NPCTypes import NPCType
 
 
 @dataclass
 class BeliefStore:
     beliefs: List[Belief] = field(default_factory=list)
 
-    def get_probability(self, predicate_temp: PredicateTemplate, i: NPCType, r: NPCType):
+    def get_probability(self, predicate_temp: PredicateTemplate, i: "NPCType", r: "NPCType"):
         for belief in self.beliefs:
             if belief.predicate_template == predicate_temp and belief.predicate.subject == i and (belief.predicate.target == r or r is None):
                 return belief.probability
