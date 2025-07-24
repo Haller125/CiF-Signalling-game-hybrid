@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import Protocol, Sequence, List, Optional
+from typing import Protocol, Sequence, List, Optional, TYPE_CHECKING
 
-from src.belief.BeliefStore import BeliefStore
-from src.desire_formation.BVolition import BVolition
-from src.social_exchange.BSocialExchange import BSocialExchange
-from src.social_exchange.BSocialExchangeTemplate import BSocialExchangeTemplate
+if TYPE_CHECKING:
+    from src.belief.BeliefStore import BeliefStore
+    from src.desire_formation.BVolition import BVolition
+    from src.social_exchange.BSocialExchange import BSocialExchange
+    from src.social_exchange.BSocialExchangeTemplate import BSocialExchangeTemplate
 
 
 class NPCType(Protocol):
