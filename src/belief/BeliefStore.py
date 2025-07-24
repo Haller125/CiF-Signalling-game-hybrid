@@ -4,14 +4,14 @@ from typing import List
 from src.belief.Belief import Belief
 from src.predicates.Predicate import Predicate
 from src.predicates.PredicateTemplate import PredicateTemplate
-from src.types.NPCTypes import NPCType
+from src.types.NPCTypes import BNPCType
 
 
 @dataclass
 class BeliefStore:
     beliefs: List[Belief] = field(default_factory=list)
 
-    def get_probability(self, predicate_temp: PredicateTemplate, i: NPCType, r: NPCType):
+    def get_probability(self, predicate_temp: PredicateTemplate, i: BNPCType, r: BNPCType):
         for belief in self.beliefs:
             if belief.predicate_template == predicate_temp and belief.predicate.subject == i and (belief.predicate.target == r or r is None):
                 return belief.probability

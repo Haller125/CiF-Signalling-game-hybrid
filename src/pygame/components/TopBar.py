@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Tuple, Optional, List
+from typing import Tuple, List
 
 import pygame
 
