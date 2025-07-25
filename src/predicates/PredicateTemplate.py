@@ -3,6 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from src.types.NPCTypes import NPCType
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.predicates.Predicate import Predicate  # Avoid circular import
 
 
 @dataclass

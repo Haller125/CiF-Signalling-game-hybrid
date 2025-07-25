@@ -1,5 +1,6 @@
+import logging
 from dataclasses import dataclass, field
-from typing import Tuple
+from typing import Tuple, Optional, Callable
 
 import pygame
 
@@ -18,6 +19,7 @@ class Button(IComponent):
     hover_color: Tuple[int, int, int] = (100, 100, 100)
     pressed_color: Tuple[int, int, int] = (150, 150, 150)
     text_color: Tuple[int, int, int] = (255, 255, 255)
+    on_click: Optional[Callable[[], None]] = field(default=None, repr=False)
 
     font: pygame.font.Font = field(init=False)
     is_hovered: bool = field(init=False, default=False)
@@ -37,11 +39,14 @@ class Button(IComponent):
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and within:
             self.is_pressed = True
             self.click_anim = True
-            self.anim_timer = 5  # frames for click animation
+            self.anim_timer = 5
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             if self.is_pressed and within:
-                # trigger action here if needed
-                pass
+                if self.on_click is not None:
+                    try:
+                        self.on_click()
+                    except Exception as exc:
+                        logging.error(f"Button on_click error: {exc}")
             self.is_pressed = False
 
     def draw(self, surface):

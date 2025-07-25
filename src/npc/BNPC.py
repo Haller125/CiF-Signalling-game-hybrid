@@ -78,3 +78,20 @@ class BNPC(BNPCType):
         beliefs_from_other_perspective = BeliefStore(beliefs=beliefs_from_other_perspective_list)
 
         return beliefs_from_other_perspective
+
+    def get_traits(self, npc=None):
+        subject = npc if npc is not None else self
+
+        res = []
+        for belief in self.beliefStore:
+            if belief.predicate.subject is subject and belief.predicate.is_single:
+                res.append(belief)
+
+        return res
+
+    def get_relationships(self, subject, target):
+        res = []
+        for belief in self.beliefStore:
+            if not belief.predicate.is_single and belief.predicate.subject is subject and belief.predicate.target is target:
+                res.append(belief)
+        return res

@@ -39,6 +39,4 @@ def test_update_beliefs_from_observation():
 
     update_beliefs_from_observation(observer, exchange, accepted=True)
     prob = observer.beliefStore.get_probability(cond_pred, i, r)
-    # The current implementation does not alter beliefs as influencing
-    # conditions are stored as templates, so the belief remains at the default.
-    assert prob == 0.5
+    assert prob == 0.8

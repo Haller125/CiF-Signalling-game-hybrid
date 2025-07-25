@@ -26,7 +26,7 @@ class TopBar(IComponent):
         x_start = self.width - (btn_w * 2 + spacing * 3)
         self.buttons = [
             Button(x=x_start + spacing, y=5, width=btn_w, height=btn_h, text="Home"),
-            Button(x=x_start + 2 * spacing + btn_w, y=5, width=btn_w, height=btn_h, text="Next action"),
+            Button(x=x_start + 2 * spacing + btn_w, y=5, width=btn_w, height=btn_h, text="Next iteration"),
             # Button(x=spacing, y=5, width=btn_w, height=btn_h, text="Braincheck")
         ]
 

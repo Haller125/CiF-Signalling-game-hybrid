@@ -25,7 +25,9 @@ class CiFBuilder:
 
         return BCiF(
             NPCs=npcs,
-            actions=self.exchanges
+            actions=self.exchanges,
+            traits=[trait for trait, _ in self.traits],
+            relationships=[relationship for relationship, _ in self.relationships],
         )
 
     def initialize_beliefs(self, npcs: List[BNPCType]):

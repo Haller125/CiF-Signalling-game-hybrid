@@ -56,6 +56,12 @@ class GameWindow:
             self.clock.tick(self.fps)
         pygame.quit()
 
+    def running_step(self):
+        self.handle_events()
+        self.update()
+        self.draw()
+        self.clock.tick(self.fps)
+
     def add_object(self, obj: IComponent):
         self.objects.append(obj)
 
