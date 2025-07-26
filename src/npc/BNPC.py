@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass, field
-from typing import Sequence, List, Optional
+from typing import Sequence, List, Optional, Dict
 
 from src.belief.BeliefStore import BeliefStore
 from src.desire_formation.BVolition import BVolition
@@ -9,12 +9,26 @@ from src.social_exchange.BSocialExchange import BSocialExchange
 from src.social_exchange.BSocialExchangeTemplate import BSocialExchangeTemplate
 from src.types.NPCTypes import BNPCType
 
+@dataclass
+class RelationPreference:
+    relation_type: str
+    weight: float
+
+@dataclass
+class Goal:
+    target_name: str
+    relation_type: str
+    value: float                # decays or satisfies over time
+    ttl: int = 20               # optional steps until it expires
+
 
 @dataclass
 class BNPC(BNPCType):
     id: int
     name: str
     beliefStore: BeliefStore = field(default_factory=BeliefStore)
+    relation_preferences: Dict[str, float] = field(default_factory=dict)
+    goals: List[Goal] = field(default_factory=list)
 
     def __str__(self):
         return f"{self.name} (ID: {self.id})"
@@ -37,6 +51,14 @@ class BNPC(BNPCType):
                     continue
 
                 score = exch.initiator_probability(self.beliefStore) * exch.responder_probability(self.beliefStore)
+
+                pref_weight = self.relation_preferences.get(exch.intent.subtype, 0.0)
+                goal_bonus = sum(g.value for g in self.goals
+                                 if g.relation_type == exch.intent.subtype
+                                 and g.target_name == exch.name)
+
+                value_term = pref_weight + goal_bonus
+                score *= value_term
                 volitions.append(BVolition(exch, score))
 
         volitions.sort(key=lambda t: t.score, reverse=True)

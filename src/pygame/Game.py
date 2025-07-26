@@ -146,7 +146,7 @@ class Game:
 
         exchanges.reverse()
 
-        return [f"{exchange.initiator} {exchange.name} {exchange.responder}" for exchange in exchanges]
+        return [f"{exchange.initiator} {exchange.text} {exchange.responder}" for exchange in exchanges]
 
     def get_data_for_mid_window(self, i: int):
         match i:
@@ -156,5 +156,15 @@ class Game:
                 return self.get_traits()
             case 2:
                 return self.get_relationships()
+
+    def save(self, path: str) -> None:
+        from src.save_system.save_system import save_model
+        save_model(self.model, path)
+
+    @staticmethod
+    def load(path: str) -> 'Game':
+        from src.save_system.save_system import load_model
+        model = load_model(path)
+        return Game(model)
 
 

@@ -49,7 +49,8 @@ def test_social_exchange_perform_accept():
         preconditions=[lambda *a, **k: True],
         initiator_irs=irs,
         responder_irs=irs,
-        effects=effects
+        effects=effects,
+        text='Test exchange',
     )
 
     assert exch.is_playable(state)

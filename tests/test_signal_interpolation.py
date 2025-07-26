@@ -26,7 +26,8 @@ def make_exchange(i, r, weight=0.8):
         preconditions=[lambda *a, **k: True],
         initiator_irs=irs,
         responder_irs=irs,
-        effects=effects
+        effects=effects,
+        text='Test exchange',
     )
     return exchange, cond_pred
 

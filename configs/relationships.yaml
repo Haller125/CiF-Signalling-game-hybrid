@@ -1,5 +1,10 @@
-friend: 0.1
-enemy: 0.05
-family: 0.02
-romantic: 0.01
-acquaintance: 0.1
+probabilities:
+  friend: 0.1
+  enemy: 0.05
+  family: 0.02
+  romantic: 0.01
+  acquaintance: 0.1
+opposites:
+  friend: [enemy]
+  enemy: [friend, family]
+  family: [enemy]

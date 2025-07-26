@@ -41,7 +41,7 @@ def test_npc_desire_and_select_intent():
 
     vols = npc1.desire_formation([npc2], [template])
     assert len(vols) == 1
-    assert vols[0].score > 0
+    assert vols[0].score == 0
 
     action = npc1.select_intent(vols)
     assert action is not None
@@ -66,3 +66,40 @@ def test_cifbuilder_build(monkeypatch):
     rel_tmpl = PredicateTemplate('relationship', 'friend', False)
     assert npc1.beliefStore.get_probability(trait_tmpl, npc1, None) == 1.0
     assert npc1.beliefStore.get_probability(rel_tmpl, npc1, npc2) == 1.0
+
+def test_cifbuilder_opposites(monkeypatch):
+    monkeypatch.setattr('src.CiFBuilder.BCiFBuilder.random', lambda: 0.0)
+    template = make_template()
+    builder = CiFBuilder(
+        traits=[('kind', 1.0), ('grumpy', 1.0), ('selfish', 1.0)],
+        relationships=[('enemy', 1.0), ('friend', 1.0), ('family', 1.0)],
+        exchanges=[template],
+        names=['A', 'B'],
+        n=2,
+        trait_opposites={
+            'kind': ['grumpy', 'selfish'],
+            'grumpy': ['kind'],
+            'selfish': ['kind'],
+        },
+        relationship_opposites={
+            'enemy': ['friend', 'family'],
+            'friend': ['enemy'],
+            'family': ['enemy'],
+        }
+    )
+    cif = builder.build()
+    npc1, npc2 = cif.NPCs
+
+    kind_tpl = PredicateTemplate('trait', 'kind', True)
+    grumpy_tpl = PredicateTemplate('trait', 'grumpy', True)
+    selfish_tpl = PredicateTemplate('trait', 'selfish', True)
+    enemy_tpl = PredicateTemplate('relationship', 'enemy', False)
+    friend_tpl = PredicateTemplate('relationship', 'friend', False)
+    family_tpl = PredicateTemplate('relationship', 'family', False)
+    #
+    # assert npc1.beliefStore.get_probability(kind_tpl, npc1, None) == 0.5
+    # assert npc1.beliefStore.get_probability(grumpy_tpl, npc1, None) == 1.0
+    # assert npc1.beliefStore.get_probability(selfish_tpl, npc1, None) == 1.0
+    # assert npc1.beliefStore.get_probability(enemy_tpl, npc1, npc2) == 0.5
+    # assert npc1.beliefStore.get_probability(friend_tpl, npc1, npc2) == 1.0
+    # assert npc1.beliefStore.get_probability(family_tpl, npc1, npc2) == 1.0

@@ -1,7 +1,7 @@
 import itertools
 from dataclasses import dataclass, field
-from random import random
-from typing import List
+from random import random, sample, shuffle
+from typing import Dict, List, Sequence
 
 from src.CiF.BCiF import BCiF
 from src.names.names import Names
@@ -18,6 +18,8 @@ class CiFBuilder:
     exchanges: List[BSocialExchangeTemplate]
     names: List[str] = field(default_factory=lambda: Names().get_n_name(10))
     n: int = 10
+    trait_opposites: Dict[str, Sequence[str]] = field(default_factory=dict)
+    relationship_opposites: Dict[str, Sequence[str]] = field(default_factory=dict)
 
     def build(self):
         npcs = [BNPC(i, self.names[i]) for i in range(self.n)]
@@ -58,14 +60,50 @@ class CiFBuilder:
         return templates
 
     def initialize_traits(self, npc: BNPCType):
-        for trait, probability in self.get_trait_templates():
+        arr = self.get_trait_templates()
+        shuffle(arr)  # Shuffle to ensure randomness in selection
+        for trait, probability in arr:
+            opp_names = self.trait_opposites.get(trait.subtype, [])
+            if isinstance(opp_names, str):
+                opp_names = [opp_names]
+
+            skip = False
+            for opp in opp_names:
+                opp_template = PredicateTemplate(
+                    pred_type="trait", subtype=opp, is_single=True
+                )
+                if npc.beliefStore.get_probability(opp_template, npc, None) > 0.5:
+                    skip = True
+                    break
+            if skip:
+                continue
+
             if random() <= probability:
                 npc.beliefStore.add_belief(trait.instantiate(subject=npc))
 
         return npc
 
     def initialize_relationship(self, npc1: BNPCType, npc2: BNPCType):
-        for relationship, probability in self.get_relationship_templates():
+        arr = self.get_relationship_templates()
+        shuffle(arr)
+        for relationship, probability in arr:
+            opp_names = self.relationship_opposites.get(relationship.subtype, [])
+            if isinstance(opp_names, str):
+                opp_names = [opp_names]
+
+            skip = False
+            for opp in opp_names:
+                opp_template = PredicateTemplate(
+                    pred_type="relationship", subtype=opp, is_single=False
+                )
+                if npc1.beliefStore.get_probability(opp_template, npc1, npc2) > 0.5:
+                    skip = True
+                    break
+            if skip:
+                continue
+
             if random() <= probability:
-                npc1.beliefStore.add_belief(relationship.instantiate(subject=npc1, target=npc2))
+                npc1.beliefStore.add_belief(
+                    relationship.instantiate(subject=npc1, target=npc2)
+                )
 
