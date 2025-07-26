@@ -17,6 +17,7 @@ class BSocialExchangeTemplate:
     initiator_irs: BInfluenceRuleSet
     responder_irs: BInfluenceRuleSet
     effects: BExchangeEffects
+    text: str = ""   # text that will be used to describe the exchange in the UI (npc i {text} npc r)
 
     def instantiate(self, initiator: BNPCType, responder: BNPCType) -> BSocialExchange:
         intent = self.intent.instantiate(subject=initiator, target=responder)
@@ -30,4 +31,5 @@ class BSocialExchangeTemplate:
             initiator_irs=self.initiator_irs,
             responder_irs=self.responder_irs,
             effects=self.effects,
+            text=self.text
         )

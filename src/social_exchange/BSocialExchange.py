@@ -19,6 +19,7 @@ class BSocialExchange:
     initiator_irs: BInfluenceRuleSet
     responder_irs: BInfluenceRuleSet
     effects: BExchangeEffects
+    text: str   # text that will be used to describe the exchange in the UI (npc i {text} npc r)
     is_accepted: bool = None
 
     def is_playable(self, state: BeliefStore) -> bool:
