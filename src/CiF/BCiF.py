@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Dict, Sequence
 
 from src.social_exchange.BSocialExchange import BSocialExchange
 from src.social_exchange.BSocialExchangeTemplate import BSocialExchangeTemplate
@@ -13,6 +13,8 @@ class BCiF:
     traits: List[str]
     relationships: List[str]
     actions_done: List[BSocialExchange] = field(default_factory=list)
+    trait_opposites: Dict[str, Sequence[str]] = field(default_factory=dict)
+    relationship_opposites: Dict[str, Sequence[str]] = field(default_factory=dict)
 
     def iteration(self):
         actions_done: List[BSocialExchange] = []

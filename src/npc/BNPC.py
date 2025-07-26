@@ -9,17 +9,19 @@ from src.social_exchange.BSocialExchange import BSocialExchange
 from src.social_exchange.BSocialExchangeTemplate import BSocialExchangeTemplate
 from src.types.NPCTypes import BNPCType
 
+
 @dataclass
 class RelationPreference:
     relation_type: str
     weight: float
 
+
 @dataclass
 class Goal:
     target_name: str
     relation_type: str
-    value: float                # decays or satisfies over time
-    ttl: int = 20               # optional steps until it expires
+    value: float
+    ttl: int = 20
 
 
 @dataclass
@@ -37,7 +39,7 @@ class BNPC(BNPCType):
         action.perform(self.beliefStore)
 
     def desire_formation(self, targets: Sequence[BNPCType], actions_templates: Sequence[BSocialExchangeTemplate]) -> \
-    List[BVolition]:
+            List[BVolition]:
         volitions: List[BVolition] = []
 
         for r in targets:
@@ -117,3 +119,49 @@ class BNPC(BNPCType):
             if not belief.predicate.is_single and belief.predicate.subject is subject and belief.predicate.target is target:
                 res.append(belief)
         return res
+
+    @staticmethod
+    def generate_random_goal(others: Sequence[BNPCType], relationships: List[str]) -> Goal:
+        from random import choice, uniform
+
+        target = choice(others)
+        relation_type = choice(relationships)
+        value = uniform(0.1, 1.0)
+
+        goal = Goal(target_name=target.name, relation_type=relation_type, value=value)
+
+        return goal
+
+    def add_goal(self, goal: Goal):
+        self.goals.append(goal)
+
+    def remove_goal(self, goal: Goal):
+        if goal in self.goals:
+            self.goals.remove(goal)
+        else:
+            logging.warning(f"Goal {goal} not found in {self.name}'s goals.")
+
+    def clear_goals(self):
+        self.goals.clear()
+        logging.info(f"All goals cleared for {self.name}.")
+
+    def add_random_goals(self, others: Sequence[BNPCType], relationships: List[str], num_goals: int = 1):
+        for _ in range(num_goals):
+            goal = self.generate_random_goal(others, relationships)
+            self.add_goal(goal)
+            logging.info(f"Added goal: {goal} to {self.name}.")
+
+    def set_relation_preference(self, relation_type: str, weight: float):
+        if weight < 0 or weight > 1:
+            logging.error("Weight must be between 0 and 1.")
+            return
+        self.relation_preferences[relation_type] = weight
+        logging.info(f"Set relation preference for {relation_type} to {weight} for {self.name}.")
+
+    def set_relation_preferences(self, preferences: Dict[str, float]):
+        for relation_type, weight in preferences.items():
+            self.set_relation_preference(relation_type, weight)
+        logging.info(f"Set multiple relation preferences for {self.name}.")
+
+
+

@@ -45,6 +45,8 @@ class CiFBuilder:
             actions=self.exchanges,
             traits=[trait for trait, _ in self.traits],
             relationships=[relationship for relationship, _ in self.relationships],
+            trait_opposites=self.trait_opposites,
+            relationship_opposites=self.relationship_opposites,
         )
 
     def initialize_beliefs(self, npcs: List[BNPCType]):

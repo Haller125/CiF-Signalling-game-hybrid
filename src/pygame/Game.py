@@ -11,13 +11,14 @@ from src.pygame.components.Column import Column
 from src.pygame.components.TabWindow import TabWindow
 from src.pygame.components.TopBar import TopBar
 from src.social_exchange.BSocialExchange import BSocialExchange
+from src.social_exchange.BSocialExchangeTemplate import BSocialExchangeTemplate
 
 
 @dataclass
 class Game:
     model: BCiF
     npcs: List = None
-    actions: List = None
+    actions: List[BSocialExchangeTemplate] = None
     traits: List[str] = None
     relationships: List[str] = None
 
