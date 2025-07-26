@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Dict, Tuple
 
 from src.belief.Belief import Belief
 from src.predicates.Predicate import Predicate
@@ -11,29 +11,58 @@ from src.types.NPCTypes import BNPCType
 class BeliefStore:
     beliefs: List[Belief] = field(default_factory=list)
 
-    def get_probability(self, predicate_temp: PredicateTemplate, i: BNPCType, r: BNPCType):
+    def __post_init__(self):
+        self._belief_index: Dict[Tuple[str, str, bool, int, int | None], Belief] = {}
         for belief in self.beliefs:
-            if belief.predicate_template == predicate_temp and belief.predicate.subject == i and (belief.predicate.target == r or r is None):
-                return belief.probability
-        return 0.5
+            key = self._key_from_predicate(belief.predicate)
+            self._belief_index[key] = belief
+
+    @staticmethod
+    def _key_from_template(template: PredicateTemplate, subject: BNPCType, target: BNPCType | None) -> Tuple[str, str, bool, int, int | None]:
+        return (
+            template.pred_type,
+            template.subtype,
+            template.is_single,
+            subject.id,
+            target.id if target else None,
+        )
+
+    @staticmethod
+    def _key_from_predicate(predicate: Predicate) -> Tuple[str, str, bool, int, int | None]:
+        return (
+            predicate.pred_type,
+            predicate.subtype,
+            predicate.is_single,
+            predicate.subject.id,
+            predicate.target.id if predicate.target else None,
+        )
+
+    def get_probability(self, predicate_temp: PredicateTemplate, i: BNPCType, r: BNPCType):
+        key = self._key_from_template(predicate_temp, i, r)
+        belief = self._belief_index.get(key)
+        return belief.probability if belief else 0.5
 
     def __iter__(self):
         return iter(self.beliefs)
 
     def __contains__(self, item: Belief | Predicate):
         if isinstance(item, Belief):
-            return item in self.beliefs
+            key = self._key_from_predicate(item.predicate)
+            return key in self._belief_index
         elif isinstance(item, Predicate):
-            return any(belief.predicate == item for belief in self.beliefs)
+            key = self._key_from_predicate(item)
+            return key in self._belief_index
         return False
 
     def update(self, predicate: Predicate, probability: float):
-        for belief in self.beliefs:
-            if belief.predicate == predicate:
-                belief.probability = probability
-                return
-        new_belief = Belief(predicate=predicate, probability=probability, predicate_template=predicate.template)
-        self.beliefs.append(new_belief)
+        key = self._key_from_predicate(predicate)
+        belief = self._belief_index.get(key)
+        if belief:
+            belief.probability = probability
+        else:
+            new_belief = Belief(predicate=predicate, probability=probability, predicate_template=predicate.template)
+            self.beliefs.append(new_belief)
+            self._belief_index[key] = new_belief
 
     def add_belief(self, predicate: Predicate, probability: float = 1.0):
         if not isinstance(predicate, Predicate):
