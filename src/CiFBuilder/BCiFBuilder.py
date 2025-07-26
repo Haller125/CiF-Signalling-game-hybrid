@@ -20,10 +20,25 @@ class CiFBuilder:
     n: int = 10
     trait_opposites: Dict[str, Sequence[str]] = field(default_factory=dict)
     relationship_opposites: Dict[str, Sequence[str]] = field(default_factory=dict)
+    NPCs: List[BNPCType] = field(default_factory=list)
 
     def build(self):
-        npcs = [BNPC(i, self.names[i]) for i in range(self.n)]
-        npcs = self.initialize_beliefs(npcs)
+        if len(self.names) < self.n:
+            raise ValueError("Not enough names provided for the number of NPCs.")
+        if len(self.traits) == 0:
+            raise ValueError("At least one trait must be provided.")
+        if len(self.relationships) == 0:
+            raise ValueError("At least one relationship must be provided.")
+        if len(self.exchanges) == 0:
+            raise ValueError("At least one social exchange template must be provided.")
+        if self.n < 1:
+            raise ValueError("At least one NPC must be created.")
+
+        if self.NPCs:
+            npcs = self.NPCs
+        else:
+            npcs = [BNPC(i, self.names[i]) for i in range(self.n)]
+            npcs = self.initialize_beliefs(npcs)
 
         return BCiF(
             NPCs=npcs,
