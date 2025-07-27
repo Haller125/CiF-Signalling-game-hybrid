@@ -1,11 +1,6 @@
 from src.CiFBuilder.BCiFBuilder import CiFBuilder
-from src.irs.BIRS import BInfluenceRuleSet
-from src.predicates.BCondition import BHasCondition
-from src.predicates.PredicateTemplate import PredicateTemplate
 from src.pygame.Game import Game
-from src.rule.BRule import BRule
-from src.social_exchange.BExchangeEffects import BExchangeEffects
-from src.social_exchange.BSocialExchangeTemplate import BSocialExchangeTemplate, make_template
+from src.social_exchange.BSocialExchangeTemplate import make_template
 
 if __name__ == "__main__":
     template = make_template()

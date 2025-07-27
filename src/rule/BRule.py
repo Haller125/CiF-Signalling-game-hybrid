@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import Optional, Sequence
 
 from src.belief.BeliefStore import BeliefStore
-from src.predicates.BCondition import BHasCondition
+from src.predicates.BCondition import IBCondition
 from src.predicates.BEffect import IBEffect
 from src.types.NPCTypes import BNPCType
 
@@ -11,7 +11,7 @@ from src.types.NPCTypes import BNPCType
 @dataclass(slots=True)
 class BRule:
     name: str
-    condition: Sequence[BHasCondition]
+    condition: Sequence[IBCondition]
     weight: Optional[float] = None
     effects: Sequence[IBEffect] = field(default_factory=list)
 
