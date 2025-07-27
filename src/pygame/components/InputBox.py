@@ -20,6 +20,10 @@ class InputBox(IComponent):
     text_color: Tuple[int, int, int] = (255, 255, 255)
     on_submit: Optional[Callable[[str], None]] = field(default=None, repr=False)
 
+    label: str = ""
+    label_color: Tuple[int, int, int] = (255, 255, 255)
+    label_padding: int = 5
+
     font: pygame.font.Font = field(init=False)
     active: bool = field(init=False, default=False)
 
@@ -48,8 +52,16 @@ class InputBox(IComponent):
                 self.text += event.unicode
 
     def draw(self, surface):
+        if self.label:
+            label_surf = self.font.render(self.label, True, self.label_color)
+            label_pos = (self.x, self.y - label_surf.get_height() - self.label_padding)
+            surface.blit(label_surf, label_pos)
+
         color = self.color_active if self.active else self.color_inactive
         rect = pygame.Rect(self.x, self.y, self.width, self.height)
         pygame.draw.rect(surface, color, rect, 2)
+
         txt_surf = self.font.render(self.text, True, self.text_color)
-        surface.blit(txt_surf, (self.x + 5, self.y + (self.height - txt_surf.get_height()) // 2))
+        text_x = self.x + 5
+        text_y = self.y + (self.height - txt_surf.get_height()) // 2
+        surface.blit(txt_surf, (text_x, text_y))

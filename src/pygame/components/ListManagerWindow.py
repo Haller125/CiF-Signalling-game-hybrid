@@ -29,6 +29,7 @@ class ListManagerWindow(IComponent):
     editing: bool = field(init=False, default=False)
     edit_index: Optional[int] = field(init=False, default=None)
     on_close: Optional[callable] = field(default=None, repr=False)
+    input_label: str = field(default="Subtype", repr=False)
 
     def __post_init__(self):
         pygame.font.init()
@@ -46,7 +47,8 @@ class ListManagerWindow(IComponent):
                                     btn_w, btn_h, "Delete", on_click=self.delete_selected)
         input_x = self.x + column_w + 10
         input_w = self.width - column_w - 20
-        self.subtype_input = InputBox(input_x, self.y + self.height // 2 - 40, input_w, 25)
+        self.subtype_input = InputBox(input_x, self.y + self.height // 2 - 40, input_w, 25,
+                                      label=self.input_label)
         self.confirm_button = Button(input_x, self.y + self.height // 2 + 35,
                                      btn_w, btn_h, "OK", on_click=self.confirm_edit)
 
