@@ -1,18 +1,18 @@
 import logging
-from dataclasses import dataclass, field
+from dataclasses import field, dataclass
 from typing import Optional
 
 import pygame
 
 from src.CiF.BCiF import BCiF
-from src.pygame.components.IComponent import IComponent
-from src.pygame.components.Column import Column
 from src.pygame.components.Button import Button
+from src.pygame.components.Column import Column
+from src.pygame.components.IComponent import IComponent
 from src.pygame.components.InputBox import InputBox
-from src.social_exchange.BSocialExchangeTemplate import make_template
+
 
 @dataclass
-class ExchangeManagerWindow(IComponent):
+class TraitsManagerWindow(IComponent):
     x: int
     y: int
     width: int
@@ -25,8 +25,7 @@ class ExchangeManagerWindow(IComponent):
     add_button: Button = field(init=False)
     edit_button: Button = field(init=False)
     delete_button: Button = field(init=False)
-    name_input: InputBox = field(init=False)
-    text_input: InputBox = field(init=False)
+    subtype_input: InputBox = field(init=False)
     confirm_button: Button = field(init=False)
     editing: bool = field(init=False, default=False)
     edit_index: Optional[int] = field(init=False, default=None)
@@ -36,7 +35,7 @@ class ExchangeManagerWindow(IComponent):
         self.font = pygame.font.SysFont(None, 20)
         column_w = self.width // 3
         self.column = Column(self.x, self.y, column_w, self.height,
-                             items=[ex.name for ex in self.model.actions])
+                             items=[trait for trait in self.model.traits])
         btn_w, btn_h = 80, 25
         btn_y = self.y
         self.add_button = Button(self.x + column_w + 10, btn_y, btn_w, btn_h,
@@ -47,16 +46,14 @@ class ExchangeManagerWindow(IComponent):
                                     btn_w, btn_h, "Delete", on_click=self.delete_selected)
         input_x = self.x + column_w + 10
         input_w = self.width - column_w - 20
-        self.name_input = InputBox(input_x, self.y + self.height // 2 - 40, input_w, 25)
-        self.text_input = InputBox(input_x, self.y + self.height // 2, input_w, 25)
+        self.subtype_input = InputBox(input_x, self.y + self.height // 2 - 40, input_w, 25)
         self.confirm_button = Button(input_x, self.y + self.height // 2 + 35,
                                      btn_w, btn_h, "OK", on_click=self.confirm_edit)
 
     def start_add(self):
         self.editing = True
         self.edit_index = None
-        self.name_input.text = ""
-        self.text_input.text = ""
+        self.subtype_input.text = ""
 
     def start_edit(self):
         idx = self.column.get_selected_index()
@@ -64,37 +61,31 @@ class ExchangeManagerWindow(IComponent):
             return
         self.editing = True
         self.edit_index = idx
-        tpl = self.model.actions[idx]
-        self.name_input.text = tpl.name
-        self.text_input.text = tpl.text
+        tpl = self.model.traits[idx]
+        self.subtype_input.text = tpl
 
     def delete_selected(self):
         idx = self.column.get_selected_index()
         if idx is None:
             return
         try:
-            del self.model.actions[idx]
+            del self.model.traits[idx]
         except Exception as exc:
             logging.error(f"Delete exchange error: {exc}")
-        self.column.items = [ex.name for ex in self.model.actions]
+        self.column.items = [trait for trait in self.model.traits]
         self.column.selected_index = None
 
     def confirm_edit(self):
-        name = self.name_input.text.strip()
-        text = self.text_input.text.strip()
+        name = self.subtype_input.text.strip()
         if not name:
             self.editing = False
             return
         if self.edit_index is None:
-            tpl = make_template()
-            tpl.name = name
-            tpl.text = text
-            self.model.actions.append(tpl)
+            tpl = name
+            self.model.traits.append(tpl)
         else:
-            tpl = self.model.actions[self.edit_index]
-            tpl.name = name
-            tpl.text = text
-        self.column.items = [ex.name for ex in self.model.actions]
+            self.model.traits[self.edit_index] = name
+        self.column.items = [trait for trait in self.model.traits]
         self.editing = False
         self.column.selected_index = None
 
@@ -106,8 +97,7 @@ class ExchangeManagerWindow(IComponent):
         self.edit_button.handle_event(event)
         self.delete_button.handle_event(event)
         if self.editing:
-            self.name_input.handle_event(event)
-            self.text_input.handle_event(event)
+            self.subtype_input.handle_event(event)
             self.confirm_button.handle_event(event)
 
     def draw(self, surface):
@@ -120,6 +110,5 @@ class ExchangeManagerWindow(IComponent):
         self.edit_button.draw(surface)
         self.delete_button.draw(surface)
         if self.editing:
-            self.name_input.draw(surface)
-            self.text_input.draw(surface)
+            self.subtype_input.draw(surface)
             self.confirm_button.draw(surface)
