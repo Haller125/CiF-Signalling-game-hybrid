@@ -27,10 +27,15 @@ class Column(IComponent):
     def __post_init__(self):
         pygame.font.init()
         self.font = pygame.font.SysFont(None, self.line_height)
-        # Filter items that should be rendered
         render_items = [item for item in self.items if item not in self.exclude_items]
         total = len(render_items) * (self.line_height + self.padding)
         self.max_scroll = max(0, total - self.height)
+
+    def recalculate_scroll(self):
+        render_items = [item for item in self.items if item not in self.exclude_items]
+        total = len(render_items) * (self.line_height + self.padding)
+        self.max_scroll = max(0, total - self.height)
+        self.scroll_offset = min(self.scroll_offset, self.max_scroll)
 
     def handle_event(self, event):
         mx, my = pygame.mouse.get_pos()
@@ -59,6 +64,7 @@ class Column(IComponent):
         # draw filtered items
         y_off = self.y - self.scroll_offset + self.padding
         render_items = [item for item in self.items if item not in self.exclude_items]
+
         for item in render_items:
             i = self.items.index(item)
             item_rect = pygame.Rect(self.x + self.padding, y_off,
