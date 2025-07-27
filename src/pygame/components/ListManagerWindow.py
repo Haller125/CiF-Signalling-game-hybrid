@@ -28,6 +28,7 @@ class ListManagerWindow(IComponent):
     confirm_button: Button = field(init=False)
     editing: bool = field(init=False, default=False)
     edit_index: Optional[int] = field(init=False, default=None)
+    on_close: Optional[callable] = field(default=None, repr=False)
 
     def __post_init__(self):
         pygame.font.init()
@@ -49,10 +50,21 @@ class ListManagerWindow(IComponent):
         self.confirm_button = Button(input_x, self.y + self.height // 2 + 35,
                                      btn_w, btn_h, "OK", on_click=self.confirm_edit)
 
+        close_x = self.x + self.width - btn_w - 10
+        self.close_button = Button(close_x, self.y + 5, btn_w, btn_h,
+                                   "Close", on_click=self.close_window)
+
     def start_add(self):
         self.editing = True
         self.edit_index = None
         self.subtype_input.text = ""
+
+    def close_window(self):
+        self.editing = False
+        self.edit_index = None
+        self.column.selected_index = None
+        if self.on_close:
+            self.on_close()
 
     def start_edit(self):
         idx = self.column.get_selected_index()
@@ -95,6 +107,7 @@ class ListManagerWindow(IComponent):
         self.add_button.handle_event(event)
         self.edit_button.handle_event(event)
         self.delete_button.handle_event(event)
+        self.close_button.handle_event(event)
         if self.editing:
             self.subtype_input.handle_event(event)
             self.confirm_button.handle_event(event)
@@ -108,6 +121,7 @@ class ListManagerWindow(IComponent):
         self.add_button.draw(surface)
         self.edit_button.draw(surface)
         self.delete_button.draw(surface)
+        self.close_button.draw(surface)
         if self.editing:
             self.subtype_input.draw(surface)
             self.confirm_button.draw(surface)

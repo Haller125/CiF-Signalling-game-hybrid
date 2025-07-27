@@ -23,6 +23,7 @@ class Column(IComponent):
     scroll_offset: int = field(init=False, default=0)
     max_scroll: int = field(init=False, default=0)
     selected_index: Optional[int] = field(init=False, default=None)
+    disabled: bool = field(init=False, default=False)
 
     def __post_init__(self):
         pygame.font.init()
@@ -38,6 +39,8 @@ class Column(IComponent):
         self.scroll_offset = min(self.scroll_offset, self.max_scroll)
 
     def handle_event(self, event):
+        if self.disabled:
+            return
         mx, my = pygame.mouse.get_pos()
         in_col = self.x <= mx <= self.x + self.width and self.y <= my <= self.y + self.height
         if event.type == pygame.MOUSEBUTTONDOWN:

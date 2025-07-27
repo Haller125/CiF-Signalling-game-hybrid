@@ -16,6 +16,7 @@ class TopBar(IComponent):
 
     font: pygame.font.Font = field(init=False)
     buttons: List[Button] = field(default_factory=list)
+    disabled: bool = field(init=False, default=False)
 
     def __post_init__(self):
         pygame.font.init()
@@ -37,5 +38,7 @@ class TopBar(IComponent):
             btn.draw(surface)
 
     def handle_event(self, event: pygame.event.Event):
+        if self.disabled:
+            return
         for btn in self.buttons:
             btn.handle_event(event)

@@ -27,11 +27,15 @@ class Button(IComponent):
     click_anim: bool = field(init=False, default=False)
     anim_timer: int = field(init=False, default=0)
 
+    disabled: bool = field(init=False, default=False)
+
     def __post_init__(self):
         pygame.font.init()
         self.font = pygame.font.SysFont(None, self.font_size)
 
     def handle_event(self, event):
+        if self.disabled:
+            return
         mx, my = pygame.mouse.get_pos()
         within = self.x <= mx <= self.x + self.width and self.y <= my <= self.y + self.height
         if event.type == pygame.MOUSEMOTION:
