@@ -34,6 +34,8 @@ class Game:
     traits_manager: TraitsManagerWindow = None
     relationships_manager: RelationshipsManagerWindow = None
 
+    overlapping_windows: List = field(default_factory=list)
+
     def __post_init__(self):
         self.npcs = self.model.NPCs
         self.actions = self.model.actions
@@ -109,13 +111,14 @@ class Game:
         self.relationships_manager = relations_manager
         self.window.add_object(relations_manager)
 
+        self.overlapping_windows.append(traits_manager)
+        self.overlapping_windows.append(relations_manager)
+
     def run(self):
         running = True
-        counter = 0
         while running:
             self.window.running_step()
             self.update_state()
-            counter = 0
         pygame.quit()
 
     def update_state(self):
@@ -139,9 +142,23 @@ class Game:
 
     def toggle_traits_manager(self):
         self.traits_manager.visible = not self.traits_manager.visible
+        self.relationships_manager.visible = False  # Hide relationships manager if traits manager is toggled
+        if self.check_is_main_available():
+            self.window.add_object(self.traits_manager)
 
     def toggle_relationships_manager(self):
         self.relationships_manager.visible = not self.relationships_manager.visible
+        self.traits_manager.visible = False  # Hide traits manager if relationships manager is toggled
+
+    def toggle_helper(self, window):
+        window.visible = not window.visible
+        for w in self.overlapping_windows:
+            if w != window:
+                w.visible = False
+        # TODO: Check if the main window is available and activate main if everything else is hidden
+
+    def check_is_main_available(self):
+        return all(not window.visible for window in self.overlapping_windows)
 
     def get_left_column_selection(self):
         selected_index = self.left_column.get_selected_index()

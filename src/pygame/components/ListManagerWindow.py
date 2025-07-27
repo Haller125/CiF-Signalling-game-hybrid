@@ -88,7 +88,6 @@ class ListManagerWindow(IComponent):
         self.column.selected_index = None
         self.column.recalculate_scroll()
 
-
     def handle_event(self, event):
         if not self.visible:
             return
