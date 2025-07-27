@@ -36,3 +36,29 @@ class BCiF:
             if (exch.initiator is i and exch.responder is r) or (exch.initiator is r and exch.responder is i):
                 res.append(exch)
         return res
+
+    def add_trait(self, trait: str, opposites: Sequence[str] = ()) -> None:
+        if trait not in self.traits:
+            self.traits.append(trait)
+        if opposites:
+            self.trait_opposites[trait] = list(opposites)
+
+    def remove_trait(self, trait: str) -> None:
+        if trait in self.traits:
+            self.traits.remove(trait)
+        self.trait_opposites.pop(trait, None)
+        for npc in self.NPCs:
+            npc.beliefStore.remove_predicate('trait', trait)
+
+    def add_relationship(self, relationship: str, opposites: Sequence[str] = ()) -> None:
+        if relationship not in self.relationships:
+            self.relationships.append(relationship)
+        if opposites:
+            self.relationship_opposites[relationship] = list(opposites)
+
+    def remove_relationship(self, relationship: str) -> None:
+        if relationship in self.relationships:
+            self.relationships.remove(relationship)
+        self.relationship_opposites.pop(relationship, None)
+        for npc in self.NPCs:
+            npc.beliefStore.remove_predicate('relationship', relationship)

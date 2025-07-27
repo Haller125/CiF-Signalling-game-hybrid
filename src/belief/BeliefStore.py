@@ -68,3 +68,15 @@ class BeliefStore:
         if not isinstance(predicate, Predicate):
             raise TypeError("Only Predicate instances can be added as traits.")
         self.update(predicate, probability)
+
+    def remove_predicate(self, pred_type: str, subtype: str) -> None:
+        to_remove = []
+        for belief in self.beliefs:
+            pred = belief.predicate
+            if pred.pred_type == pred_type and pred.subtype == subtype:
+                to_remove.append(belief)
+
+        for belief in to_remove:
+            self.beliefs.remove(belief)
+            key = self._key_from_predicate(belief.predicate)
+            self._belief_index.pop(key, None)

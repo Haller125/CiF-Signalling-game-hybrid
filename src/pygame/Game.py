@@ -8,6 +8,8 @@ from src.npc.BNPC import BNPC
 from src.pygame import MainWindow
 from src.pygame.components.Button import Button
 from src.pygame.components.Column import Column
+
+from src.pygame.components.ExchangeManagerWindow import ExchangeManagerWindow
 from src.pygame.components.TabWindow import TabWindow
 from src.pygame.components.TopBar import TopBar
 from src.social_exchange.BSocialExchange import BSocialExchange
@@ -28,6 +30,7 @@ class Game:
     right_column_exclude_items: List = field(default_factory=list)
 
     mid_window: TabWindow = None
+    exchange_manager: ExchangeManagerWindow = None
 
     def __post_init__(self):
         self.npcs = self.model.NPCs
@@ -39,12 +42,14 @@ class Game:
         topbar = TopBar(width=self.window.width, height=self.window.height // 5)
         btn_w, btn_h = 80, topbar.height - 10
         spacing = 10
-        x_start = topbar.width - (btn_w * 2 + spacing * 3)
+        num_buttons = 3
+        x_start = topbar.width - (btn_w * num_buttons + spacing * (num_buttons + 3))
         buttons = [
 
             Button(x=x_start + spacing, y=5, width=btn_w, height=btn_h, text="Home"),
             Button(x=x_start + 2 * spacing + btn_w, y=5, width=btn_w, height=btn_h, text="Next iteration", on_click=self.next_iteration),
-            # Button(x=spacing, y=5, width=btn_w, height=btn_h, text="Braincheck")
+            Button(x=x_start + 3 * spacing + 2 * btn_w, y=5, width=btn_w, height=btn_h, text="Exchanges",
+                   on_click=self.toggle_exchange_manager),
         ]
         topbar.buttons = buttons
         self.window.add_object(topbar)
@@ -81,6 +86,16 @@ class Game:
                         get_data_for_tab=self.get_data_for_mid_window)
         self.window.add_object(mid)
         self.mid_window = mid
+
+        self.exchange_manager = ExchangeManagerWindow(
+            x=self.window.width // 8,
+            y=self.window.height // 8,
+            width=self.window.width * 3 // 4,
+            height=self.window.height * 3 // 4,
+            model=self.model,
+            visible=False,
+        )
+        self.window.add_object(self.exchange_manager)
 
     def run(self):
         running = True
@@ -168,4 +183,7 @@ class Game:
         model = load_model(path)
         return Game(model)
 
-
+    def toggle_exchange_manager(self):
+        if self.exchange_manager is None:
+            return
+        self.exchange_manager.visible = not self.exchange_manager.visible
