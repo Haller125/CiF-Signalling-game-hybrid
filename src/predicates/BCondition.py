@@ -23,7 +23,7 @@ class BHasCondition(IBCondition):
             return False
         return state.get_probability(self.req_predicate, i, r)
 
-
+@dataclass
 class BHasNotCondition(IBCondition):
     req_predicate: PredicateTemplate
 
