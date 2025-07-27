@@ -32,3 +32,12 @@ class BHasNotCondition(IBCondition):
             logging.error("Condition is empty.")
             return False
         return 1.0 - state.get_probability(self.req_predicate, i, r)
+
+# This class is used to represent a constant condition that always returns the same value. For tests
+class BConstantCondition(IBCondition):
+    def __init__(self, value: float):
+        super().__init__(req_predicate=PredicateTemplate("trait", "constant", True))
+        self.value = value
+
+    def __call__(self, *args, **kwargs) -> float:  # type: ignore[override]
+        return self.value
