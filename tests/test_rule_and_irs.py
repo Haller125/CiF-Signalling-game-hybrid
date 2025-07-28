@@ -11,7 +11,7 @@ from src.npc.BNPC import BNPC
 
 class DummyCondition(BHasCondition):
     def __init__(self, value: float):
-        super().__init__(req_predicate=PredicateTemplate('trait','dummy',True))
+        super().__init__(req_predicate=PredicateTemplate('trait', 'dummy', True))
         self.value = value
 
     def __call__(self, *args, **kwargs) -> float:
@@ -23,7 +23,7 @@ def make_npcs(n=2):
 
 
 def test_rule_probability():
-    rule = BRule(name='r', condition=[DummyCondition(0.2), DummyCondition(0.5)])
+    rule = BRule(name='r', condition=[DummyCondition(0.2), DummyCondition(0.5)], weight=1.0)
     store = BeliefStore()
     i, r = make_npcs()
     assert rule.probability(store, i, r) == pytest.approx(0.1)
@@ -43,8 +43,9 @@ def test_influence_rule_set_calculations():
     expected_prob = 1.0 / (1.0 + math.exp(-expected_value))
     assert irs.acceptance_probability(store, i, r) == pytest.approx(expected_prob)
 
+
 def test_rule_probability_no_conditions():
-    rule = BRule(name='empty', condition=[])
+    rule = BRule(name='empty', condition=[], weight=1.0)
     with pytest.raises(ValueError):
         rule.probability(BeliefStore(), BNPC(0, 'A'), BNPC(1, 'B'))
 
@@ -59,7 +60,7 @@ class InvalidCondition(BHasCondition):
 
 
 def test_rule_probability_invalid_value():
-    rule = BRule(name='r', condition=[InvalidCondition(1.5)])
+    rule = BRule(name='r', condition=[InvalidCondition(1.5)], weight=1.0)
     with pytest.raises(ValueError):
         rule.probability(BeliefStore(), BNPC(0, 'A'), BNPC(1, 'B'))
 

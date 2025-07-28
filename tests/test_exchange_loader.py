@@ -1,12 +1,10 @@
-import pytest
-
+from src.predicates.BCondition import BHasCondition, BHasNotCondition
+from src.predicates.PredicateTemplate import PredicateTemplate
+from src.social_exchange.BSocialExchangeTemplate import BSocialExchangeTemplate
 from src.social_exchange.exchange_loader import (
     load_exchange_templates,
     BConstantCondition,
 )
-from src.social_exchange.BSocialExchangeTemplate import BSocialExchangeTemplate
-from src.predicates.PredicateTemplate import PredicateTemplate
-from src.predicates.BCondition import BHasCondition, BHasNotCondition
 
 
 def test_load_exchange_templates():
@@ -34,11 +32,11 @@ def test_load_exchange_templates():
     assert len(accept_effects) == 2
     assert len(reject_effects) == 2
     assert accept_effects[0].probability == 1.0
-    pred_add = accept_effects[0].predicates[0]
+    pred_add = accept_effects[0].predicate
     assert isinstance(pred_add, PredicateTemplate)
     assert pred_add.subtype == 'ally'
-    pred_remove = accept_effects[1].predicates[0]
+    pred_remove = accept_effects[1].predicate
     assert pred_remove.subtype == 'enemy'
     assert reject_effects[0].label == 'remove'
-    pred_rj_add = reject_effects[1].predicates[0]
+    pred_rj_add = reject_effects[1].predicate
     assert pred_rj_add.subtype == 'rival'

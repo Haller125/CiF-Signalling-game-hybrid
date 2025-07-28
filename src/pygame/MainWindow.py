@@ -1,12 +1,9 @@
+from dataclasses import dataclass, field
 from typing import List
 
 import pygame
-from dataclasses import dataclass, field
 
-from src.pygame.components.Column import Column
 from src.pygame.components.IComponent import IComponent
-from src.pygame.components.TabWindow import TabWindow
-from src.pygame.components.TopBar import TopBar
 
 
 @dataclass

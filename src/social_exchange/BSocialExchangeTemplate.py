@@ -18,7 +18,7 @@ class BSocialExchangeTemplate:
     initiator_irs: BInfluenceRuleSet
     responder_irs: BInfluenceRuleSet
     effects: BExchangeEffects
-    text: str = ""   # text that will be used to describe the exchange in the UI (npc i {text} npc r)
+    text: str = ""  # text that will be used to describe the exchange in the UI (npc i {text} npc r)
 
     def instantiate(self, initiator: BNPCType, responder: BNPCType) -> BSocialExchange:
         intent = self.intent.instantiate(subject=initiator, target=responder)
@@ -35,6 +35,7 @@ class BSocialExchangeTemplate:
             text=self.text
         )
 
+
 def make_template():
     tmpl = PredicateTemplate('relationship', 'ally', False)
     rule = BRule(name='r', condition=[DummyCondition(1.0)], weight=1.0)
@@ -49,9 +50,10 @@ def make_template():
         effects=effects
     )
 
+
 class DummyCondition(BHasCondition):
     def __init__(self, value: float = 1.0):
-        super().__init__(req_predicate=PredicateTemplate('trait','dummy',True))
+        super().__init__(req_predicate=PredicateTemplate('trait', 'dummy', True))
         self.value = value
 
     def __call__(self, *args, **kwargs) -> float:

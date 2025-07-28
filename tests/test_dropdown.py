@@ -4,12 +4,12 @@ import pygame
 from src.pygame.components.Dropdown import Dropdown
 
 
-def setup_module(module):
+def setup_module():
     os.environ["SDL_VIDEODRIVER"] = "dummy"
     pygame.init()
 
 
-def teardown_module(module):
+def teardown_module():
     pygame.quit()
 
 

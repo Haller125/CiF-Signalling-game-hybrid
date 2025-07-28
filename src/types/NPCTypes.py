@@ -23,7 +23,7 @@ class BNPCType(Protocol):
         raise NotImplementedError
 
     def desire_formation(self, targets: Sequence[BNPCType], actions_templates: Sequence[BSocialExchangeTemplate]) -> \
-    List[BVolition]:
+            List[BVolition]:
         raise NotImplementedError
 
     def select_intent(self, volitions: Sequence[BVolition], threshold: float = 0.0) -> Optional[BSocialExchange]:

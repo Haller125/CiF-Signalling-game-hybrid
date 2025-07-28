@@ -51,10 +51,10 @@ def _parse_effect(data: dict):
     if "add" in data:
         pred = _predicate_template(data["add"])
         prob = data["add"].get("probability", 1.0)
-        return BAddPredicateEffect(label="add", predicates=[pred], probability=prob)
+        return BAddPredicateEffect(label="add", predicate=pred, probability=prob)
     if "remove" in data:
         pred = _predicate_template(data["remove"])
-        return BRemovePredicateEffect(label="remove", predicates=[pred])
+        return BRemovePredicateEffect(label="remove", predicate=pred)
     raise ValueError(f"Unknown effect type: {data}")
 
 

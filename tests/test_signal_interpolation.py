@@ -94,7 +94,7 @@ def test_update_beliefs_complex_environment():
 
     update_beliefs_from_observation(observer, exchange, accepted=False)
 
-    sigmoid = lambda x: 1/(1+math.exp(-x))
+    sigmoid = lambda x: 1 / (1 + math.exp(-x))
     logistic_i = sigmoid(0.8 - 0.2)
     logistic_r = sigmoid(0.5)
     expected_i = (logistic_i * 0.3) / (logistic_i * 0.3 + (1 - logistic_i) * (1 - 0.3))

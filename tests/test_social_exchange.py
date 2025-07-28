@@ -13,7 +13,7 @@ from src.npc.BNPC import BNPC
 
 class DummyCondition(BHasCondition):
     def __init__(self, value: float):
-        super().__init__(req_predicate=PredicateTemplate('trait','dummy',True))
+        super().__init__(req_predicate=PredicateTemplate('trait', 'dummy', True))
         self.value = value
 
     def __call__(self, *args, **kwargs) -> float:
@@ -37,8 +37,8 @@ def test_social_exchange_perform_accept():
     intent = tmpl.instantiate(initiator, responder)
     irs = make_irs(1.0)
     effects = BExchangeEffects(
-        accept_effects=[BAddPredicateEffect(label='a', predicates=[tmpl], probability=1.0)],
-        reject_effects=[BRemovePredicateEffect(label='r', predicates=[tmpl])]
+        accept_effects=[BAddPredicateEffect(label='a', predicate=tmpl, probability=1.0)],
+        reject_effects=[BRemovePredicateEffect(label='r', predicate=tmpl)]
     )
 
     exch = BSocialExchange(

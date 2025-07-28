@@ -1,6 +1,6 @@
 import itertools
 from dataclasses import dataclass, field
-from random import random, sample, shuffle
+from random import random, shuffle
 from typing import Dict, List, Sequence
 
 from src.CiF.BCiF import BCiF

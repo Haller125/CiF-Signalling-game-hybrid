@@ -1,18 +1,16 @@
-import pytest
-
 from src.CiFBuilder.BCiFBuilder import CiFBuilder
+from src.irs.BIRS import BInfluenceRuleSet
 from src.npc.BNPC import BNPC
+from src.predicates.BCondition import BHasCondition
 from src.predicates.PredicateTemplate import PredicateTemplate
+from src.rule.BRule import BRule
 from src.social_exchange.BExchangeEffects import BExchangeEffects
 from src.social_exchange.BSocialExchangeTemplate import BSocialExchangeTemplate
-from src.rule.BRule import BRule
-from src.irs.BIRS import BInfluenceRuleSet
-from src.predicates.BCondition import BHasCondition
 
 
 class DummyCondition(BHasCondition):
     def __init__(self, value: float = 1.0):
-        super().__init__(req_predicate=PredicateTemplate('trait','dummy',True))
+        super().__init__(req_predicate=PredicateTemplate('trait', 'dummy', True))
         self.value = value
 
     def __call__(self, *args, **kwargs) -> float:
@@ -67,6 +65,7 @@ def test_cifbuilder_build(monkeypatch):
     assert npc1.beliefStore.get_probability(trait_tmpl, npc1, None) == 1.0
     assert npc1.beliefStore.get_probability(rel_tmpl, npc1, npc2) == 1.0
 
+
 def test_cifbuilder_opposites(monkeypatch):
     monkeypatch.setattr('src.CiFBuilder.BCiFBuilder.random', lambda: 0.0)
     template = make_template()
@@ -88,14 +87,14 @@ def test_cifbuilder_opposites(monkeypatch):
         }
     )
     cif = builder.build()
-    npc1, npc2 = cif.NPCs
+    _, _ = cif.NPCs
 
-    kind_tpl = PredicateTemplate('trait', 'kind', True)
-    grumpy_tpl = PredicateTemplate('trait', 'grumpy', True)
-    selfish_tpl = PredicateTemplate('trait', 'selfish', True)
-    enemy_tpl = PredicateTemplate('relationship', 'enemy', False)
-    friend_tpl = PredicateTemplate('relationship', 'friend', False)
-    family_tpl = PredicateTemplate('relationship', 'family', False)
+    PredicateTemplate('trait', 'kind', True)
+    PredicateTemplate('trait', 'grumpy', True)
+    PredicateTemplate('trait', 'selfish', True)
+    PredicateTemplate('relationship', 'enemy', False)
+    PredicateTemplate('relationship', 'friend', False)
+    PredicateTemplate('relationship', 'family', False)
     #
     # assert npc1.beliefStore.get_probability(kind_tpl, npc1, None) == 0.5
     # assert npc1.beliefStore.get_probability(grumpy_tpl, npc1, None) == 1.0

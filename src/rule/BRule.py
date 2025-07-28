@@ -12,7 +12,7 @@ from src.types.NPCTypes import BNPCType
 class BRule:
     name: str
     condition: Sequence[IBCondition]
-    weight: Optional[float] = None
+    weight: Optional[float]
     effects: Sequence[IBEffect] = field(default_factory=list)
 
     def probability(self, beliefs: BeliefStore, i: BNPCType, r: BNPCType = None) -> float:

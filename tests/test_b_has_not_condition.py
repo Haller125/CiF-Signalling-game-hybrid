@@ -31,6 +31,6 @@ def test_rule_probability_with_has_not_condition():
     store.add_belief(pred, probability=0.7)
 
     cond = BHasNotCondition(req_predicate=tmpl)
-    rule = BRule(name='r', condition=[cond])
+    rule = BRule(name='r', condition=[cond], weight=1.0)
     prob = rule.probability(store, npc)
     assert prob == pytest.approx(0.3)

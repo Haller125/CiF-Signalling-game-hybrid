@@ -107,11 +107,12 @@ class TabWindow(IComponent):
         elif event.type == pygame.MOUSEWHEEL:
             mx, my = pygame.mouse.get_pos()
             if (self.x <= mx <= self.x + self.width and
-                self.y + self.header_height <= my <= self.y + self.height):
+                    self.y + self.header_height <= my <= self.y + self.height):
                 self.scroll_offset -= event.y * self.scroll_speed
                 if self.scroll_offset < 0:
                     self.scroll_offset = 0
 
+    # noinspection PyBroadException
     def draw(self, surface):
         bg = self.disabled_bg_color if self.disabled else self.bg_color
         tab_c_default = self.disabled_tab_color if self.disabled else self.tab_color
@@ -139,6 +140,7 @@ class TabWindow(IComponent):
 
         data: List[Tuple[str, Optional[float]]] = []
         if callable(self.get_data_for_tab) and self.selected_index >= 0:
+            # noinspection PyBroadException
             try:
                 data = self.get_data_for_tab(self.selected_index)
             except Exception:
