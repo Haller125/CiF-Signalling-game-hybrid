@@ -17,17 +17,17 @@ def update_beliefs_from_observation(observer: BNPCType, exchange: BSocialExchang
                 if cond.req_predicate not in influencing_conditions_i:
                     influencing_conditions_i.append(cond.req_predicate)
 
-    for cond in influencing_conditions_i:
-        p_template = cond
+    for tmp in influencing_conditions_i:
+        p_template = tmp
         pred = p_template.instantiate(subject=i, target=r) if not p_template.is_single else p_template.instantiate(subject=i)
 
-        p_obs_given_true = estimate_likelihood(exchange.initiator_irs, predicate=p_template, pred_true=True, accepted=accepted)
-        p_obs_given_false = estimate_likelihood(exchange.initiator_irs, predicate=p_template, pred_true=False, accepted=accepted)
+        p_obs_given_true = estimate_likelihood(exchange.initiator_irs, predicate=p_template, pred_true=True, accepted=True)
+        p_obs_given_false = estimate_likelihood(exchange.initiator_irs, predicate=p_template, pred_true=False, accepted=True)
 
         prior_prob = observer.beliefStore.get_probability(p_template, i, r)
         numerator = p_obs_given_true * prior_prob
 
-        denominator = numerator + p_obs_given_false * (1 - prior_prob)
+        denominator = p_obs_given_true * prior_prob + p_obs_given_false * (1 - prior_prob)
         if denominator == 0:
             continue
         posterior_prob = numerator / denominator
@@ -41,8 +41,8 @@ def update_beliefs_from_observation(observer: BNPCType, exchange: BSocialExchang
                 if cond.req_predicate not in influencing_conditions_r:
                     influencing_conditions_r.append(cond.req_predicate)
 
-    for cond in influencing_conditions_r:
-        p_template = cond
+    for tmp in influencing_conditions_r:
+        p_template = tmp
         pred = p_template.instantiate(subject=r, target=i) if not p_template.is_single else p_template.instantiate(subject=r)
 
         p_obs_given_true = estimate_likelihood(exchange.responder_irs, predicate=p_template, pred_true=True, accepted=accepted)

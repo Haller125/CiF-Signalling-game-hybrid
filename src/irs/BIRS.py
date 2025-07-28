@@ -5,6 +5,7 @@ from typing import List
 from src.belief.BeliefStore import BeliefStore
 from src.rule.BRule import BRule
 from src.types.NPCTypes import BNPCType
+from src.utils.sigmoid import sigmoid
 
 
 @dataclass(slots=True)
@@ -19,7 +20,7 @@ class BInfluenceRuleSet:
     def acceptance_probability(self, beliefs: BeliefStore, i: BNPCType, r: BNPCType,
                                bias: float = 0.0) -> float:
         s = self.expected_value(beliefs, i, r)
-        return 1.0 / (1.0 + math.exp(-(bias + s)))  # logistic sigma
+        return sigmoid(x=s, bias=bias)
 
     def add(self, *new_rules: BRule) -> None:
         self.rules.extend(new_rules)

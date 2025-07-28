@@ -1,5 +1,6 @@
 import logging
 from dataclasses import dataclass, field
+import random
 from typing import Sequence, List, Optional, Dict
 
 from src.belief.BeliefStore import BeliefStore
@@ -21,7 +22,6 @@ class Goal:
     target_name: str
     relation_type: str
     value: float
-    ttl: int = 20
 
 
 @dataclass
@@ -52,15 +52,13 @@ class BNPC(BNPCType):
                 if not exch.is_playable(self.beliefStore):
                     continue
 
-                score = exch.initiator_probability(self.beliefStore) * exch.responder_probability(self.beliefStore)
+                score = exch.initiator_probability(self.beliefStore) * exch.responder_probability(self.estimate_belief_about(r))
 
                 pref_weight = self.relation_preferences.get(exch.intent.subtype, 0.0)
                 goal_bonus = sum(g.value for g in self.goals
                                  if g.relation_type == exch.intent.subtype
-                                 and g.target_name == exch.name)
-
-                value_term = pref_weight + goal_bonus
-                score *= value_term
+                                 and g.target_name == r.name)
+                score *= max(pref_weight + goal_bonus, 1e-3)
                 volitions.append(BVolition(exch, score))
 
         volitions.sort(key=lambda t: t.score, reverse=True)
@@ -70,12 +68,11 @@ class BNPC(BNPCType):
         if not volitions:
             return None
 
-        best_volition = max(volitions, key=lambda v: v.score)
+        best = max(volitions, key=lambda v: v.score)
 
-        if best_volition.score >= threshold:
-            return best_volition.social_exchange
+        choices: Sequence[BVolition] = [v for v in volitions if v.score == best.score]
 
-        return None
+        return random.choice(choices).social_exchange
 
     def update_beliefs_from_observation(self, actions_done: Sequence[BSocialExchange]) -> None:
         for action in actions_done:
@@ -96,7 +93,7 @@ class BNPC(BNPCType):
         return action
 
     def estimate_belief_about(self, other: BNPCType) -> BeliefStore:
-        beliefs_from_other_perspective_list = [belief for belief in self.beliefStore
+        beliefs_from_other_perspective_list = [belief.clone() for belief in self.beliefStore
                                                if belief.predicate.subject == other]
 
         beliefs_from_other_perspective = BeliefStore(beliefs=beliefs_from_other_perspective_list)
@@ -153,8 +150,7 @@ class BNPC(BNPCType):
 
     def set_relation_preference(self, relation_type: str, weight: float):
         if weight < 0 or weight > 1:
-            logging.error("Weight must be between 0 and 1.")
-            return
+            raise ValueError("Weight must be between 0 and 1.")
         self.relation_preferences[relation_type] = weight
         logging.info(f"Set relation preference for {relation_type} to {weight} for {self.name}.")
 

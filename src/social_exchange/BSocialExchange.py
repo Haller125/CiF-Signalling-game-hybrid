@@ -9,7 +9,7 @@ from src.social_exchange.BExchangeEffects import BExchangeEffects
 from src.types.NPCTypes import BNPCType
 
 
-@dataclass(slots=True)
+@dataclass
 class BSocialExchange:
     name: str
     initiator: BNPCType
@@ -21,9 +21,10 @@ class BSocialExchange:
     effects: BExchangeEffects
     text: str   # text that will be used to describe the exchange in the UI (npc i {text} npc r)
     is_accepted: bool = None
+    playability_threshold: float = 0.4
 
     def is_playable(self, state: BeliefStore) -> bool:
-        return all(cond(state, self.initiator, self.responder) for cond in self.preconditions)
+        return all(cond(state, self.initiator, self.responder) >= self.playability_threshold for cond in self.preconditions)
 
     def initiator_score(self, state: BeliefStore) -> float:
         return self.initiator_irs.expected_value(state, self.initiator, self.responder)
@@ -34,14 +35,11 @@ class BSocialExchange:
     def responder_probability(self, state: BeliefStore) -> float:
         return self.responder_irs.acceptance_probability(state, self.responder, self.initiator)
 
-    def responder_accepts(self, state: BeliefStore, threshold: float = 0.0) -> bool:
-        return self.responder_irs.acceptance_probability(state, self.responder, self.initiator, threshold) > 0.5
+    def responder_accepts(self, state: BeliefStore, threshold: float = 0.5) -> bool:
+        return self.responder_irs.acceptance_probability(state, self.responder, self.initiator) >= threshold
 
     def perform(self, state: BeliefStore) -> None:
-        if not self.is_playable(state):
-            raise ValueError(f"Exchange '{self.name}' is not playable in the current state.")
-
-        if self.responder_accepts(state):
+        if self.responder_accepts(self.responder.beliefStore):
             self.effects.accept(state, self.initiator, self.responder)
             self.is_accepted = True
         else:

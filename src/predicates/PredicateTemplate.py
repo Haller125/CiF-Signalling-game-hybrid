@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from src.predicates.Predicate import Predicate  # Avoid circular import
 
 
-@dataclass
+@dataclass(frozen=True)
 class PredicateTemplate:
     pred_type: str  # "trait", "relationship" etc.
     subtype: str  # "trust", "friendship", "kind", "evil" etc.
@@ -25,3 +25,8 @@ class PredicateTemplate:
             is_single=self.is_single,
             template=self,
         )
+
+    def matches(self, other: PredicateTemplate) -> bool:
+        return (self.pred_type == other.pred_type and
+                self.subtype == other.subtype and
+                self.is_single == other.is_single)

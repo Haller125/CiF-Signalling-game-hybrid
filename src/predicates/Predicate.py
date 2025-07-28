@@ -25,3 +25,13 @@ class Predicate:
         return (self.pred_type == temp.pred_type and
                 self.subtype == temp.subtype and
                 self.is_single == temp.is_single)
+
+    def clone(self) -> "Predicate":
+        return Predicate(
+            pred_type=self.pred_type,
+            subtype=self.subtype,
+            subject=self.subject,
+            is_single=self.is_single,
+            template=self.template,
+            target=self.target if self.target else None
+        )
