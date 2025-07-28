@@ -42,3 +42,30 @@ def test_influence_rule_set_calculations():
 
     expected_prob = 1.0 / (1.0 + math.exp(-expected_value))
     assert irs.acceptance_probability(store, i, r) == pytest.approx(expected_prob)
+
+def test_rule_probability_no_conditions():
+    rule = BRule(name='empty', condition=[])
+    with pytest.raises(ValueError):
+        rule.probability(BeliefStore(), BNPC(0, 'A'), BNPC(1, 'B'))
+
+
+class InvalidCondition(BHasCondition):
+    def __init__(self, value: float):
+        super().__init__(req_predicate=PredicateTemplate('trait', 'dummy', True))
+        self.value = value
+
+    def __call__(self, *args, **kwargs) -> float:
+        return self.value
+
+
+def test_rule_probability_invalid_value():
+    rule = BRule(name='r', condition=[InvalidCondition(1.5)])
+    with pytest.raises(ValueError):
+        rule.probability(BeliefStore(), BNPC(0, 'A'), BNPC(1, 'B'))
+
+
+def test_birs_add():
+    irs = BInfluenceRuleSet(name='irs')
+    rule = BRule(name='r', condition=[DummyCondition(1.0)], weight=1.0)
+    irs.add(rule)
+    assert rule in irs.rules
