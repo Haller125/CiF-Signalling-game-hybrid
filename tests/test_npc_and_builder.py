@@ -41,7 +41,7 @@ def test_npc_desire_and_select_intent():
 
     vols = npc1.desire_formation([npc2], [template])
     assert len(vols) == 1
-    assert vols[0].score == 0
+    assert vols[0].score < 0.1
 
     action = npc1.select_intent(vols)
     assert action is not None

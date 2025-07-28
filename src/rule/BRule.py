@@ -8,7 +8,7 @@ from src.predicates.BEffect import IBEffect
 from src.types.NPCTypes import BNPCType
 
 
-@dataclass(slots=True)
+@dataclass
 class BRule:
     name: str
     condition: Sequence[IBCondition]
