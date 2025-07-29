@@ -98,6 +98,10 @@ class Dropdown(IComponent):
                 new_offset = max(0, min(max_scroll, new_offset))
                 self.scroll_offset = new_offset
 
+    def menu_rect(self) -> pygame.Rect:
+        height = self.item_height * min(len(self.options), self.max_visible)
+        return pygame.Rect(self.x, self.y + self.height, self.width, height)
+
     def draw(self, surface: pygame.Surface):
         main_color = self.color_active if self.active else self.color_inactive
         main_rect = pygame.Rect(self.x, self.y, self.width, self.height)

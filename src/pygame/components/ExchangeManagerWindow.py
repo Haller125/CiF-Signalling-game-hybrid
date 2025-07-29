@@ -13,6 +13,7 @@ from src.pygame.components.Button import Button
 from src.pygame.components.InputBox import InputBox
 from src.social_exchange.BSocialExchangeTemplate import make_template
 
+
 @dataclass
 class PreconditionRow:
     cond_dropdown: Dropdown
@@ -42,9 +43,6 @@ class ExchangeManagerWindow(IComponent):
     edit_index: Optional[int] = field(init=False, default=None)
     selected_index: Optional[int] = field(init=False, default=None)
     on_close: Optional[callable] = field(default=None, repr=False)
-
-    precondition_rows: List[PreconditionRow] = field(init=False, default_factory=list)
-    add_precond_button: Button = field(init=False)
 
     def __post_init__(self):
         pygame.font.init()
@@ -92,20 +90,9 @@ class ExchangeManagerWindow(IComponent):
             25,
             label='Text of Exchange (for logging in history tab)',
         )
-        self.preconditions_y = self.text_input.y + d_btwn // 2
-        self.precond_cond_w = input_w // 3
-        self.precond_pred_w = input_w - self.precond_cond_w - 35
-        self.add_precond_button = Button(
-            input_x,
-            self.preconditions_y,
-            btn_w,
-            btn_h,
-            "+Cond",
-            on_click=self.add_precondition_row,
-        )
         self.confirm_button = Button(
             input_x,
-            self.preconditions_y + btn_h + 5,
+            btn_h + 5,
             btn_w,
             btn_h,
             "OK",
@@ -116,7 +103,7 @@ class ExchangeManagerWindow(IComponent):
                                    "Close", on_click=self.close_window)
         if self.model.actions:
             self.selected_index = 0
-            tpl = self.model.actions[0]
+            tpl = self.model.actions[self.selected_index]
             self.name_input.text = tpl.name
             self.text_input.text = tpl.text
             try:
@@ -134,8 +121,6 @@ class ExchangeManagerWindow(IComponent):
         self.name_input.text = ""
         self.text_input.text = ""
         self.selected_index = None
-        self.precondition_rows.clear()
-        self.reposition_preconditions()
 
         if self.model.relationships:
             self.intent_dropdown.selected_index = 0
@@ -145,7 +130,7 @@ class ExchangeManagerWindow(IComponent):
     def refresh_dropdown(self):
         self.intent_dropdown.options = list(self.model.relationships)
         self.intent_dropdown.scroll_offset = 0
-        self.intent_dropdown.selected_index = None if self.intent_dropdown.options is not None else (self.intent_dropdown.selected_index or 0)
+        self.intent_dropdown.selected_index = None if self.intent_dropdown.options is None else (self.intent_dropdown.selected_index or 0)
 
     def close_window(self):
         self.editing = False
@@ -167,11 +152,6 @@ class ExchangeManagerWindow(IComponent):
         tpl = self.model.actions[idx]
         self.name_input.text = tpl.name
         self.text_input.text = tpl.text
-        self.precondition_rows.clear()
-        for cond in getattr(tpl, "preconditions", []):
-            self.add_precondition_row(from_condition=cond)
-        if not self.precondition_rows:
-            self.reposition_preconditions()
         try:
             self.intent_dropdown.selected_index = self.model.relationships.index(
                 tpl.intent.subtype
@@ -221,7 +201,6 @@ class ExchangeManagerWindow(IComponent):
             if intent_subtype is not None:
                 tpl.intent = PredicateTemplate("relationship", intent_subtype, False)
 
-        tpl.preconditions = self.get_preconditions_from_rows()
         self.column.items = [ex.name for ex in self.model.actions]
         self.editing = False
         self.column.selected_index = None
@@ -233,6 +212,16 @@ class ExchangeManagerWindow(IComponent):
     def handle_event(self, event):
         if not self.visible:
             return
+        # If any dropdown menu is open, capture clicks within it
+        if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION, pygame.MOUSEWHEEL):
+            mx, my = event.pos if hasattr(event, "pos") else pygame.mouse.get_pos()
+            open_dds = []
+            if self.intent_dropdown.active:
+                open_dds.append(self.intent_dropdown)
+            for dd in open_dds:
+                if dd.menu_rect().collidepoint(mx, my):
+                    dd.handle_event(event)
+                    return
         prev_selected = self.column.get_selected_index()
         self.column.handle_event(event)
         if not self.editing:
@@ -264,11 +253,6 @@ class ExchangeManagerWindow(IComponent):
             self.text_input.handle_event(event)
             self.confirm_button.handle_event(event)
             self.intent_dropdown.handle_event(event)
-            self.add_precond_button.handle_event(event)
-            for row in self.precondition_rows:
-                row.cond_dropdown.handle_event(event)
-                row.pred_dropdown.handle_event(event)
-                row.remove_button.handle_event(event)
 
     def draw(self, surface):
         if not self.visible:
@@ -283,105 +267,15 @@ class ExchangeManagerWindow(IComponent):
         self.name_input.draw(surface)
         self.text_input.draw(surface)
         self.intent_dropdown.draw(surface)
+        open_menus = []
+        if self.intent_dropdown.active:
+            open_menus.append(self.intent_dropdown)
+
         if self.editing:
-            for row in self.precondition_rows:
-                row.cond_dropdown.draw(surface)
-                row.pred_dropdown.draw(surface)
-                row.remove_button.draw(surface)
-            self.add_precond_button.draw(surface)
             self.confirm_button.draw(surface)
+
+        for dd in open_menus:
+            dd.draw(surface)
 
     def _predicate_options(self) -> List[str]:
         return [f"trait:{t}" for t in self.model.traits] + [f"relationship:{r}" for r in self.model.relationships]
-
-    def _cond_options(self) -> List[str]:
-        return ["Has", "Has not", "Constant"]
-
-    def reposition_preconditions(self):
-        y = self.preconditions_y
-        for row in self.precondition_rows:
-            row.cond_dropdown.x = self.intent_dropdown.x
-            row.pred_dropdown.x = self.intent_dropdown.x + self.precond_cond_w + 5
-            row.remove_button.x = self.intent_dropdown.x + self.precond_cond_w + self.precond_pred_w + 10
-            row.cond_dropdown.y = y
-            row.pred_dropdown.y = y
-            row.remove_button.y = y
-            y += row.cond_dropdown.height + 5
-        self.add_precond_button.y = y
-        self.confirm_button.y = y + self.add_precond_button.height + 5
-
-    def add_precondition_row(self, from_condition=None):
-        cond_dd = Dropdown(
-            self.intent_dropdown.x,
-            0,
-            self.precond_cond_w,
-            25,
-            options=self._cond_options(),
-        )
-        pred_dd = Dropdown(
-            self.intent_dropdown.x + self.precond_cond_w + 5,
-            0,
-            self.precond_pred_w,
-            25,
-            options=self._predicate_options(),
-        )
-        rm_btn = Button(
-            self.intent_dropdown.x + self.precond_cond_w + self.precond_pred_w + 10,
-            0,
-            25,
-            25,
-            "-",
-            on_click=lambda: self.remove_precondition_row(row)
-        )
-        row = PreconditionRow(cond_dropdown=cond_dd, pred_dropdown=pred_dd, remove_button=rm_btn)
-        if from_condition is not None:
-            ctype, pval = self._condition_to_ui(from_condition)
-            if ctype in cond_dd.options:
-                cond_dd.selected_index = cond_dd.options.index(ctype)
-            if pval and pval in pred_dd.options:
-                pred_dd.selected_index = pred_dd.options.index(pval)
-        else:
-            if cond_dd.options:
-                cond_dd.selected_index = 0
-            if pred_dd.options:
-                pred_dd.selected_index = 0
-        self.precondition_rows.append(row)
-        self.reposition_preconditions()
-
-    def remove_precondition_row(self, row: PreconditionRow):
-        if row in self.precondition_rows:
-            self.precondition_rows.remove(row)
-        self.reposition_preconditions()
-
-    def _condition_to_ui(self, cond) -> tuple:
-        from src.predicates.BCondition import BHasCondition, BHasNotCondition, BConstantCondition
-        if isinstance(cond, BHasCondition):
-            val = f"{cond.req_predicate.pred_type}:{cond.req_predicate.subtype}"
-            return "Has", val
-        if isinstance(cond, BHasNotCondition):
-            val = f"{cond.req_predicate.pred_type}:{cond.req_predicate.subtype}"
-            return "Has not", val
-        if isinstance(cond, BConstantCondition):
-            return "Constant", None
-        return "Constant", None
-
-    def get_preconditions_from_rows(self):
-        from src.predicates.BCondition import BHasCondition, BHasNotCondition, BConstantCondition
-        res = []
-        for row in self.precondition_rows:
-            ctype = row.cond_dropdown.options[row.cond_dropdown.selected_index] if row.cond_dropdown.selected_index is not None else "Has"
-            pred_val = None
-            if row.pred_dropdown.selected_index is not None and row.pred_dropdown.selected_index < len(row.pred_dropdown.options):
-                pred_val = row.pred_dropdown.options[row.pred_dropdown.selected_index]
-            if ctype == "Constant":
-                res.append(BConstantCondition(1.0))
-            else:
-                if pred_val is None:
-                    continue
-                ptype, subtype = pred_val.split(":", 1)
-                templ = PredicateTemplate(ptype, subtype, ptype == "trait")
-                if ctype == "Has":
-                    res.append(BHasCondition(templ))
-                else:
-                    res.append(BHasNotCondition(templ))
-        return res
