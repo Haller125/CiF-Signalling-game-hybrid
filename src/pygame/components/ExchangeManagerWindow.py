@@ -15,13 +15,6 @@ from src.social_exchange.BSocialExchangeTemplate import make_template
 
 
 @dataclass
-class PreconditionRow:
-    cond_dropdown: Dropdown
-    pred_dropdown: Dropdown
-    remove_button: Button
-
-
-@dataclass
 class ExchangeManagerWindow(IComponent):
     x: int
     y: int
