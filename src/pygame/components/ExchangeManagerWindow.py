@@ -1,5 +1,5 @@
 import logging
-from dataclasses import dataclass, field
+from dataclasses import field, dataclass
 from typing import Optional
 
 import pygame
@@ -28,8 +28,11 @@ class ExchangeManagerWindow(IComponent):
     name_input: InputBox = field(init=False)
     text_input: InputBox = field(init=False)
     confirm_button: Button = field(init=False)
+    close_button: Button = field(init=False)
     editing: bool = field(init=False, default=False)
     edit_index: Optional[int] = field(init=False, default=None)
+    selected_index: Optional[int] = field(init=False, default=None)
+    on_close: Optional[callable] = field(default=None, repr=False)
 
     def __post_init__(self):
         pygame.font.init()
@@ -49,14 +52,39 @@ class ExchangeManagerWindow(IComponent):
         input_w = self.width - column_w - 20
         self.name_input = InputBox(input_x, self.y + self.height // 2 - 40, input_w, 25)
         self.text_input = InputBox(input_x, self.y + self.height // 2, input_w, 25)
-        self.confirm_button = Button(input_x, self.y + self.height // 2 + 35,
-                                     btn_w, btn_h, "OK", on_click=self.confirm_edit)
+        self.confirm_button = Button(
+            input_x,
+            self.y + self.height // 2 + 35,
+            btn_w,
+            btn_h,
+            "OK",
+            on_click=self.confirm_edit,
+        )
+        close_x = self.x + self.width - btn_w - 10
+        self.close_button = Button(close_x, self.y + 5, btn_w, btn_h,
+                                   "Close", on_click=self.close_window)
+        if self.model.actions:
+            self.selected_index = 0
+            tpl = self.model.actions[0]
+            self.name_input.text = tpl.name
+            self.text_input.text = tpl.text
 
     def start_add(self):
         self.editing = True
         self.edit_index = None
         self.name_input.text = ""
         self.text_input.text = ""
+        self.selected_index = None
+
+    def close_window(self):
+        self.editing = False
+        self.edit_index = None
+        self.column.selected_index = None
+        self.selected_index = None
+        self.name_input.text = ""
+        self.text_input.text = ""
+        if self.on_close:
+            self.on_close()
 
     def start_edit(self):
         idx = self.column.get_selected_index()
@@ -67,6 +95,7 @@ class ExchangeManagerWindow(IComponent):
         tpl = self.model.actions[idx]
         self.name_input.text = tpl.name
         self.text_input.text = tpl.text
+        self.selected_index = idx
 
     def delete_selected(self):
         idx = self.column.get_selected_index()
@@ -78,6 +107,9 @@ class ExchangeManagerWindow(IComponent):
             logging.error(f"Delete exchange error: {exc}")
         self.column.items = [ex.name for ex in self.model.actions]
         self.column.selected_index = None
+        self.selected_index = None
+        self.name_input.text = ""
+        self.text_input.text = ""
 
     def confirm_edit(self):
         name = self.name_input.text.strip()
@@ -97,14 +129,30 @@ class ExchangeManagerWindow(IComponent):
         self.column.items = [ex.name for ex in self.model.actions]
         self.editing = False
         self.column.selected_index = None
+        self.selected_index = None
+        self.name_input.text = ""
+        self.text_input.text = ""
 
     def handle_event(self, event):
         if not self.visible:
             return
+        prev_selected = self.column.get_selected_index()
         self.column.handle_event(event)
+        if not self.editing:
+            idx = self.column.get_selected_index()
+            if idx is not None and idx != prev_selected:
+                self.selected_index = idx
+                tpl = self.model.actions[idx]
+                self.name_input.text = tpl.name
+                self.text_input.text = tpl.text
+            elif idx is None:
+                self.selected_index = None
+                self.name_input.text = ""
+                self.text_input.text = ""
         self.add_button.handle_event(event)
         self.edit_button.handle_event(event)
         self.delete_button.handle_event(event)
+        self.close_button.handle_event(event)
         if self.editing:
             self.name_input.handle_event(event)
             self.text_input.handle_event(event)
@@ -119,7 +167,8 @@ class ExchangeManagerWindow(IComponent):
         self.add_button.draw(surface)
         self.edit_button.draw(surface)
         self.delete_button.draw(surface)
+        self.close_button.draw(surface)
+        self.name_input.draw(surface)
+        self.text_input.draw(surface)
         if self.editing:
-            self.name_input.draw(surface)
-            self.text_input.draw(surface)
             self.confirm_button.draw(surface)

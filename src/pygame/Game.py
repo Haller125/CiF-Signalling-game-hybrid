@@ -8,6 +8,7 @@ from src.npc.BNPC import BNPC
 from src.pygame import MainWindow
 from src.pygame.components.Button import Button
 from src.pygame.components.Column import Column
+from src.pygame.components.ExchangeManagerWindow import ExchangeManagerWindow
 from src.pygame.components.RelationshipsManagerWindow import RelationshipsManagerWindow
 
 from src.pygame.components.TabWindow import TabWindow
@@ -33,9 +34,11 @@ class Game:
     mid_window: TabWindow = None
     traits_manager: TraitsManagerWindow = None
     relationships_manager: RelationshipsManagerWindow = None
+    exchange_manager: ExchangeManagerWindow = None
 
     overlapping_windows: List = field(default_factory=list)
     main_window_components: List = field(default_factory=list)
+
 
     def __post_init__(self):
         self.npcs = self.model.NPCs
@@ -55,6 +58,8 @@ class Game:
             Button(x=x_start + 2 * spacing + btn_w, y=5, width=btn_w, height=btn_h, text="Next iteration", on_click=self.next_iteration),
             Button(x=x_start + 3 * spacing + 2 * btn_w, y=5, width=btn_w, height=btn_h, text="Traits", on_click=self.toggle_traits_manager),
             Button(x=x_start + 4 * spacing + 3 * btn_w, y=5, width=btn_w, height=btn_h, text="Relationships", on_click=self.toggle_relationships_manager),
+            Button(x=x_start + 5 * spacing + 4 * btn_w, y=5, width=btn_w, height=btn_h, text="Exchanges",
+                   on_click=self.toggle_exchange_manager)
         ]
         topbar.buttons = buttons
         self.window.add_object(topbar)
@@ -114,9 +119,21 @@ class Game:
         self.relationships_manager = relations_manager
         self.window.add_object(relations_manager)
 
+        exchange_manager = ExchangeManagerWindow(
+            x=self.window.width // 8,
+            y=self.window.height // 8,
+            width=self.window.width * 3 // 4,
+            height=self.window.height * 3 // 4,
+            model=self.model,
+            on_close=lambda: self.toggle_exchange_manager(),
+        )
+        self.exchange_manager = exchange_manager
+        self.window.add_object(exchange_manager)
+
         # Kind of different windows
         self.overlapping_windows.append(traits_manager)
         self.overlapping_windows.append(relations_manager)
+        self.overlapping_windows.append(exchange_manager)
 
         # Main window components
         self.main_window_components.append(topbar)
@@ -155,6 +172,9 @@ class Game:
 
     def toggle_relationships_manager(self):
         self.toggle_helper(self.relationships_manager)
+
+    def toggle_exchange_manager(self):
+        self.toggle_helper(self.exchange_manager)
 
     def toggle_helper(self, window):
         window.visible = not window.visible
