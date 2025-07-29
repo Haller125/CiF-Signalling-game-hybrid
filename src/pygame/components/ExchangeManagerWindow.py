@@ -5,6 +5,8 @@ from typing import Optional
 import pygame
 
 from src.CiF.BCiF import BCiF
+from src.predicates.PredicateTemplate import PredicateTemplate
+from src.pygame.components.Dropdown import Dropdown
 from src.pygame.components.IComponent import IComponent
 from src.pygame.components.Column import Column
 from src.pygame.components.Button import Button
@@ -50,6 +52,13 @@ class ExchangeManagerWindow(IComponent):
                                     btn_w, btn_h, "Delete", on_click=self.delete_selected)
         input_x = self.x + column_w + 10
         input_w = self.width - column_w - 20
+        self.intent_dropdown = Dropdown(
+            input_x,
+            self.y + self.height // 2 - 80,
+            input_w,
+            25,
+            options=list(self.model.relationships),
+        )
         self.name_input = InputBox(input_x, self.y + self.height // 2 - 40, input_w, 25)
         self.text_input = InputBox(input_x, self.y + self.height // 2, input_w, 25)
         self.confirm_button = Button(
@@ -68,6 +77,14 @@ class ExchangeManagerWindow(IComponent):
             tpl = self.model.actions[0]
             self.name_input.text = tpl.name
             self.text_input.text = tpl.text
+            try:
+                self.intent_dropdown.selected_index = self.model.relationships.index(
+                    tpl.intent.subtype
+                )
+            except ValueError:
+                self.intent_dropdown.selected_index = None
+        elif self.model.relationships:
+            self.intent_dropdown.selected_index = 0
 
     def start_add(self):
         self.editing = True
@@ -76,6 +93,11 @@ class ExchangeManagerWindow(IComponent):
         self.text_input.text = ""
         self.selected_index = None
 
+        if self.model.relationships:
+            self.intent_dropdown.selected_index = 0
+        else:
+            self.intent_dropdown.selected_index = None
+
     def close_window(self):
         self.editing = False
         self.edit_index = None
@@ -83,6 +105,7 @@ class ExchangeManagerWindow(IComponent):
         self.selected_index = None
         self.name_input.text = ""
         self.text_input.text = ""
+        self.intent_dropdown.selected_index = None
         if self.on_close:
             self.on_close()
 
@@ -95,6 +118,12 @@ class ExchangeManagerWindow(IComponent):
         tpl = self.model.actions[idx]
         self.name_input.text = tpl.name
         self.text_input.text = tpl.text
+        try:
+            self.intent_dropdown.selected_index = self.model.relationships.index(
+                tpl.intent.subtype
+            )
+        except ValueError:
+            self.intent_dropdown.selected_index = None
         self.selected_index = idx
 
     def delete_selected(self):
@@ -114,6 +143,12 @@ class ExchangeManagerWindow(IComponent):
     def confirm_edit(self):
         name = self.name_input.text.strip()
         text = self.text_input.text.strip()
+        intent_idx = self.intent_dropdown.selected_index
+        intent_subtype = (
+            self.intent_dropdown.options[intent_idx]
+            if intent_idx is not None and intent_idx < len(self.intent_dropdown.options)
+            else None
+        )
         if not name:
             self.editing = False
             return
@@ -122,16 +157,22 @@ class ExchangeManagerWindow(IComponent):
             tpl.name = name
             tpl.text = text
             self.model.actions.append(tpl)
+
+            if intent_subtype is not None:
+                tpl.intent = PredicateTemplate("relationship", intent_subtype, False)
         else:
             tpl = self.model.actions[self.edit_index]
             tpl.name = name
             tpl.text = text
+            if intent_subtype is not None:
+                tpl.intent = PredicateTemplate("relationship", intent_subtype, False)
         self.column.items = [ex.name for ex in self.model.actions]
         self.editing = False
         self.column.selected_index = None
         self.selected_index = None
         self.name_input.text = ""
         self.text_input.text = ""
+        self.intent_dropdown.selected_index = None
 
     def handle_event(self, event):
         if not self.visible:
@@ -145,10 +186,18 @@ class ExchangeManagerWindow(IComponent):
                 tpl = self.model.actions[idx]
                 self.name_input.text = tpl.name
                 self.text_input.text = tpl.text
+
+                try:
+                    self.intent_dropdown.selected_index = self.model.relationships.index(
+                        tpl.intent.subtype
+                    )
+                except ValueError:
+                    self.intent_dropdown.selected_index = None
             elif idx is None:
                 self.selected_index = None
                 self.name_input.text = ""
                 self.text_input.text = ""
+                self.intent_dropdown.selected_index = None
         self.add_button.handle_event(event)
         self.edit_button.handle_event(event)
         self.delete_button.handle_event(event)
@@ -157,6 +206,7 @@ class ExchangeManagerWindow(IComponent):
             self.name_input.handle_event(event)
             self.text_input.handle_event(event)
             self.confirm_button.handle_event(event)
+            self.intent_dropdown.handle_event(event)
 
     def draw(self, surface):
         if not self.visible:
@@ -170,5 +220,6 @@ class ExchangeManagerWindow(IComponent):
         self.close_button.draw(surface)
         self.name_input.draw(surface)
         self.text_input.draw(surface)
+        self.intent_dropdown.draw(surface)
         if self.editing:
             self.confirm_button.draw(surface)
