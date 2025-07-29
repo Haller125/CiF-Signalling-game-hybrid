@@ -354,6 +354,9 @@ class ExchangeManagerWindow(IComponent):
 
             self.precond_dropdowns.append((dd_type, dd_pred))
 
+        ok_y = start_y + len(tpl.preconditions) * (height + spacing) + 5
+        self.confirm_button.y = ok_y
+
     def _make_type_handler(self, idx: int):
         def handler(selection: str):
             if self.selected_index is None:
