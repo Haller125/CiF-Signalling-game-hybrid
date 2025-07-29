@@ -1,6 +1,6 @@
 import math
 from dataclasses import dataclass, field
-from typing import Optional, Sequence
+from typing import Sequence
 
 from src.belief.BeliefStore import BeliefStore
 from src.predicates.BCondition import IBCondition
@@ -12,7 +12,7 @@ from src.types.NPCTypes import BNPCType
 class BRule:
     name: str
     condition: Sequence[IBCondition]
-    weight: Optional[float]
+    weight: float
     effects: Sequence[IBEffect] = field(default_factory=list)
 
     def probability(self, beliefs: BeliefStore, i: BNPCType, r: BNPCType = None) -> float:
