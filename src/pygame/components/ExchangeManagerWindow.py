@@ -13,6 +13,7 @@ from src.pygame.components.Button import Button
 from src.pygame.components.InputBox import InputBox
 from src.social_exchange.BSocialExchangeTemplate import make_template
 
+
 @dataclass
 class ExchangeManagerWindow(IComponent):
     x: int
@@ -44,26 +45,47 @@ class ExchangeManagerWindow(IComponent):
                              items=[ex.name for ex in self.model.actions])
         btn_w, btn_h = 80, 25
         btn_y = self.y
-        self.add_button = Button(self.x + column_w + 10, btn_y, btn_w, btn_h,
+        top_padding = 10
+        self.add_button = Button(self.x + column_w + 10, btn_y + top_padding,
+                                 btn_w, btn_h,
                                  "Add", on_click=self.start_add)
-        self.edit_button = Button(self.x + column_w + 10, btn_y + btn_h + 5,
-                                  btn_w, btn_h, "Edit", on_click=self.start_edit)
-        self.delete_button = Button(self.x + column_w + 10, btn_y + 2 * (btn_h + 5),
-                                    btn_w, btn_h, "Delete", on_click=self.delete_selected)
+        self.edit_button = Button(self.x + column_w + 10, btn_y + btn_h + 5 + top_padding,
+                                  btn_w, btn_h,
+                                  "Edit", on_click=self.start_edit)
+        self.delete_button = Button(self.x + column_w + 10, btn_y + 2 * (btn_h + 5) + top_padding,
+                                    btn_w, btn_h,
+                                    "Delete", on_click=self.delete_selected)
         input_x = self.x + column_w + 10
         input_w = self.width - column_w - 20
+
+        top_y = self.y + self.height // 2 - 80
+        d_btwn = 60
         self.intent_dropdown = Dropdown(
             input_x,
-            self.y + self.height // 2 - 80,
+            top_y,
             input_w,
             25,
             options=list(self.model.relationships),
+            label="Intent Relationship of Exchange",
         )
-        self.name_input = InputBox(input_x, self.y + self.height // 2 - 40, input_w, 25)
-        self.text_input = InputBox(input_x, self.y + self.height // 2, input_w, 25)
+        self.refresh_dropdown()
+        self.name_input = InputBox(
+            input_x,
+            top_y + d_btwn,
+            input_w,
+            25,
+            label='Name of Exchange',
+        )
+        self.text_input = InputBox(
+            input_x,
+            top_y + d_btwn * 2,
+            input_w,
+            25,
+            label='Text of Exchange (for logging in history tab)',
+        )
         self.confirm_button = Button(
             input_x,
-            self.y + self.height // 2 + 35,
+            top_y + d_btwn * 3,
             btn_w,
             btn_h,
             "OK",
@@ -97,6 +119,11 @@ class ExchangeManagerWindow(IComponent):
             self.intent_dropdown.selected_index = 0
         else:
             self.intent_dropdown.selected_index = None
+
+    def refresh_dropdown(self):
+        self.intent_dropdown.options = list(self.model.relationships)
+        self.intent_dropdown.scroll_offset = 0
+        self.intent_dropdown.selected_index = 0 if self.intent_dropdown.options else None
 
     def close_window(self):
         self.editing = False
@@ -193,6 +220,7 @@ class ExchangeManagerWindow(IComponent):
                     )
                 except ValueError:
                     self.intent_dropdown.selected_index = None
+                self.refresh_dropdown()
             elif idx is None:
                 self.selected_index = None
                 self.name_input.text = ""

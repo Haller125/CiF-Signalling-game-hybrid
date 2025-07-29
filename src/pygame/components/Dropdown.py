@@ -27,6 +27,10 @@ class Dropdown(IComponent):
     scroll_offset: int = field(init=False, default=0)
     selected_index: Optional[int] = field(init=False, default=None)
 
+    label: str = ""
+    label_color: Tuple[int, int, int] = (255, 255, 255)
+    label_padding: int = 5
+
     def __post_init__(self):
         pygame.font.init()
         self.font = pygame.font.SysFont(None, self.font_size)
@@ -102,6 +106,11 @@ class Dropdown(IComponent):
         text = self.options[self.selected_index] if self.selected_index is not None else ""
         txt_surf = self.font.render(text, True, self.text_color)
         surface.blit(txt_surf, (self.x + 5, self.y + (self.height - txt_surf.get_height()) // 2))
+
+        if self.label:
+            label_surf = self.font.render(self.label, True, self.label_color)
+            label_pos = (self.x, self.y - label_surf.get_height() - self.label_padding)
+            surface.blit(label_surf, label_pos)
 
         if self.active:
             list_height = self.item_height * min(len(self.options), self.max_visible)

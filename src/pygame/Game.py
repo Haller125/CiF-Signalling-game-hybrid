@@ -174,6 +174,7 @@ class Game:
         self.toggle_helper(self.relationships_manager)
 
     def toggle_exchange_manager(self):
+        self.exchange_manager.refresh_dropdown()
         self.toggle_helper(self.exchange_manager)
 
     def toggle_helper(self, window):

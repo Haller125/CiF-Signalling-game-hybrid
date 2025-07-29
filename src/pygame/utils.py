@@ -19,7 +19,7 @@ if __name__ == "__main__":
             ('neighbor', 0.5), ('parent', 0.6), ('child', 0.65), ('boss', 0.3),
             ('follower', 0.55), ('leader', 0.8), ('acquaintance', 0.6), ('teammate', 0.7),
             ('classmate', 0.65), ('partner', 0.75), ('spouse', 0.5), ('roommate', 0.4),
-            ('adversary', 0.35), ('confidant', 0.6)
+            ('adversary', 0.35), ('confidant', 0.6), ('ally', 0.85), ('opponent', 0.3)
         ],
         exchanges=[template],
         names=[

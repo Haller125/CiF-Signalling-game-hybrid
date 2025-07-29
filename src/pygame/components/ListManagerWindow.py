@@ -39,12 +39,16 @@ class ListManagerWindow(IComponent):
                              items=list(self.items))
         btn_w, btn_h = 80, 25
         btn_y = self.y
-        self.add_button = Button(self.x + column_w + 10, btn_y, btn_w, btn_h,
+        top_padding = 10
+        self.add_button = Button(self.x + column_w + 10, btn_y + top_padding,
+                                 btn_w, btn_h,
                                  "Add", on_click=self.start_add)
-        self.edit_button = Button(self.x + column_w + 10, btn_y + btn_h + 5,
-                                  btn_w, btn_h, "Edit", on_click=self.start_edit)
-        self.delete_button = Button(self.x + column_w + 10, btn_y + 2 * (btn_h + 5),
-                                    btn_w, btn_h, "Delete", on_click=self.delete_selected)
+        self.edit_button = Button(self.x + column_w + 10, btn_y + btn_h + 5 + top_padding,
+                                  btn_w, btn_h,
+                                  "Edit", on_click=self.start_edit)
+        self.delete_button = Button(self.x + column_w + 10, btn_y + 2 * (btn_h + 5) + top_padding,
+                                    btn_w, btn_h,
+                                    "Delete", on_click=self.delete_selected)
         input_x = self.x + column_w + 10
         input_w = self.width - column_w - 20
         self.subtype_input = InputBox(input_x, self.y + self.height // 2 - 40, input_w, 25,
