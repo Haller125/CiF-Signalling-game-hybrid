@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Sequence
+from typing import Sequence, List
 
 from src.irs.BIRS import BInfluenceRuleSet
 from src.predicates.BCondition import IBCondition, BHasCondition
@@ -13,7 +13,7 @@ from src.types.NPCTypes import BNPCType
 @dataclass
 class BSocialExchangeTemplate:
     name: str
-    preconditions: Sequence[IBCondition]
+    preconditions: List[IBCondition]
     intent: PredicateTemplate
     initiator_irs: BInfluenceRuleSet
     responder_irs: BInfluenceRuleSet
@@ -41,9 +41,10 @@ def make_template():
     rule = BRule(name='r', condition=[DummyCondition(1.0)], weight=1.0)
     irs = BInfluenceRuleSet(name='irs', rules=[rule])
     effects = BExchangeEffects([], [])
+    preconditions = [DummyCondition(1.0)]  # Placeholder for actual conditions
     return BSocialExchangeTemplate(
         name='ally_request',
-        preconditions=[lambda *a, **k: True],
+        preconditions=preconditions,  # Using the first condition as a placeholder
         intent=tmpl,
         initiator_irs=irs,
         responder_irs=irs,

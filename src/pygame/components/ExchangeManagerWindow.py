@@ -1,6 +1,6 @@
 import logging
 from dataclasses import field, dataclass
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
 import pygame
 
@@ -32,6 +32,10 @@ class ExchangeManagerWindow(IComponent):
     text_input: InputBox = field(init=False)
     confirm_button: Button = field(init=False)
     close_button: Button = field(init=False)
+
+    precond_dropdowns: List[Tuple[Dropdown, Dropdown]] = field(init=False, default_factory=list)
+    precond_label_y: int = field(init=False, default=0)
+
     editing: bool = field(init=False, default=False)
     edit_index: Optional[int] = field(init=False, default=None)
     selected_index: Optional[int] = field(init=False, default=None)
@@ -83,6 +87,7 @@ class ExchangeManagerWindow(IComponent):
             25,
             label='Text of Exchange (for logging in history tab)',
         )
+        self.precond_label_y = top_y + d_btwn * 3
         self.confirm_button = Button(
             input_x,
             btn_h + 5,
@@ -108,6 +113,8 @@ class ExchangeManagerWindow(IComponent):
         elif self.model.relationships:
             self.intent_dropdown.selected_index = 0
 
+        self._refresh_preconditions_ui()
+
     def start_add(self):
         self.editing = True
         self.edit_index = None
@@ -119,11 +126,13 @@ class ExchangeManagerWindow(IComponent):
             self.intent_dropdown.selected_index = 0
         else:
             self.intent_dropdown.selected_index = None
+        self._refresh_preconditions_ui()
 
     def refresh_dropdown(self):
         self.intent_dropdown.options = list(self.model.relationships)
         self.intent_dropdown.scroll_offset = 0
-        self.intent_dropdown.selected_index = None if self.intent_dropdown.options is None else (self.intent_dropdown.selected_index or 0)
+        self.intent_dropdown.selected_index = None if self.intent_dropdown.options is None else (
+                    self.intent_dropdown.selected_index or 0)
 
     def close_window(self):
         self.editing = False
@@ -133,6 +142,7 @@ class ExchangeManagerWindow(IComponent):
         self.name_input.text = ""
         self.text_input.text = ""
         self.intent_dropdown.selected_index = None
+        self._refresh_preconditions_ui()
         if self.on_close:
             self.on_close()
 
@@ -152,6 +162,7 @@ class ExchangeManagerWindow(IComponent):
         except ValueError:
             self.intent_dropdown.selected_index = None
         self.selected_index = idx
+        self._refresh_preconditions_ui()
 
     def delete_selected(self):
         idx = self.column.get_selected_index()
@@ -166,6 +177,7 @@ class ExchangeManagerWindow(IComponent):
         self.selected_index = None
         self.name_input.text = ""
         self.text_input.text = ""
+        self._refresh_preconditions_ui()
 
     def confirm_edit(self):
         name = self.name_input.text.strip()
@@ -201,6 +213,7 @@ class ExchangeManagerWindow(IComponent):
         self.name_input.text = ""
         self.text_input.text = ""
         self.intent_dropdown.selected_index = None
+        self._refresh_preconditions_ui()
 
     def handle_event(self, event):
         if not self.visible:
@@ -211,6 +224,12 @@ class ExchangeManagerWindow(IComponent):
             open_dds = []
             if self.intent_dropdown.active:
                 open_dds.append(self.intent_dropdown)
+            if self.editing:
+                for d_t, d_p in self.precond_dropdowns:
+                    if d_t.active:
+                        open_dds.append(d_t)
+                    if d_p.active:
+                        open_dds.append(d_p)
             for dd in open_dds:
                 if dd.menu_rect().collidepoint(mx, my):
                     dd.handle_event(event)
@@ -232,11 +251,13 @@ class ExchangeManagerWindow(IComponent):
                 except ValueError:
                     self.intent_dropdown.selected_index = None
                 self.refresh_dropdown()
+                self._refresh_preconditions_ui()
             elif idx is None:
                 self.selected_index = None
                 self.name_input.text = ""
                 self.text_input.text = ""
                 self.intent_dropdown.selected_index = None
+                self._refresh_preconditions_ui()
         self.add_button.handle_event(event)
         self.edit_button.handle_event(event)
         self.delete_button.handle_event(event)
@@ -246,6 +267,10 @@ class ExchangeManagerWindow(IComponent):
             self.text_input.handle_event(event)
             self.confirm_button.handle_event(event)
             self.intent_dropdown.handle_event(event)
+        if self.editing:
+            for d_t, d_p in self.precond_dropdowns:
+                d_t.handle_event(event)
+                d_p.handle_event(event)
 
     def draw(self, surface):
         if not self.visible:
@@ -267,8 +292,100 @@ class ExchangeManagerWindow(IComponent):
         if self.editing:
             self.confirm_button.draw(surface)
 
+        if self.selected_index is not None and self.precond_dropdowns:
+            label = self.font.render("Preconditions", True, (255, 255, 255))
+            surface.blit(label, (self.name_input.x, self.precond_label_y - 20))
+            for d_type, d_pred in self.precond_dropdowns:
+                d_type.draw(surface)
+                d_pred.draw(surface)
+                if self.editing:
+                    if d_type.active:
+                        open_menus.append(d_type)
+                    if d_pred.active:
+                        open_menus.append(d_pred)
+
         for dd in open_menus:
             dd.draw(surface)
 
     def _predicate_options(self) -> List[str]:
         return [f"trait:{t}" for t in self.model.traits] + [f"relationship:{r}" for r in self.model.relationships]
+
+    PRECOND_TYPES = ["Has", "Has not", "Const"]
+
+    def _refresh_preconditions_ui(self):
+        self.precond_dropdowns.clear()
+        if self.selected_index is None:
+            return
+        tpl = self.model.actions[self.selected_index]
+        start_y = self.precond_label_y
+        height = 25
+        spacing = 5
+        type_w = 100
+        pred_w = self.width - (self.x + self.width // 3 + 10) - type_w - 10
+        x_type = self.name_input.x
+        x_pred = x_type + type_w + 5
+
+        options_pred = self._predicate_options()
+
+        for idx, cond in enumerate(tpl.preconditions):
+            dd_type = Dropdown(
+                x_type,
+                start_y + idx * (height + spacing),
+                type_w,
+                height,
+                options=list(self.PRECOND_TYPES),
+                on_select=self._make_type_handler(idx),
+            )
+            cond_type = cond.get_type()
+            if cond_type in self.PRECOND_TYPES:
+                dd_type.selected_index = self.PRECOND_TYPES.index(cond_type)
+
+            dd_pred = Dropdown(
+                x_pred,
+                start_y + idx * (height + spacing),
+                pred_w,
+                height,
+                options=list(options_pred),
+                on_select=self._make_pred_handler(idx),
+            )
+            pred_str = f"{cond.req_predicate.pred_type}:{cond.req_predicate.subtype}"
+            if pred_str in options_pred:
+                dd_pred.selected_index = options_pred.index(pred_str)
+
+            self.precond_dropdowns.append((dd_type, dd_pred))
+
+    def _make_type_handler(self, idx: int):
+        def handler(selection: str):
+            if self.selected_index is None:
+                return
+            tpl = self.model.actions[self.selected_index]
+            pred = tpl.preconditions[idx].req_predicate
+            if selection == "Has":
+                from src.predicates.BCondition import BHasCondition
+
+                tpl.preconditions[idx] = BHasCondition(pred)
+            elif selection == "Has not":
+                from src.predicates.BCondition import BHasNotCondition
+
+                tpl.preconditions[idx] = BHasNotCondition(pred)
+            else:
+                from src.predicates.BCondition import BConstantCondition
+
+                val = 1.0
+                if hasattr(tpl.preconditions[idx], "value"):
+                    val = tpl.preconditions[idx].value
+                tpl.preconditions[idx] = BConstantCondition(val)
+
+        return handler
+
+    def _make_pred_handler(self, idx: int):
+        def handler(selection: str):
+            if self.selected_index is None:
+                return
+            tpl = self.model.actions[self.selected_index]
+            pred_type, subtype = selection.split(":", 1)
+            tpl.preconditions[idx].req_predicate = PredicateTemplate(
+                pred_type, subtype, False
+            )
+
+        return handler
