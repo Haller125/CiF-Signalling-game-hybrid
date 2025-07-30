@@ -15,7 +15,7 @@ class BConstantCondition(BHasCondition):
         super().__init__(req_predicate=PredicateTemplate("trait", "constant", True))
         self.value = value
 
-    def __call__(self, *args, **kwargs) -> float:  # type: ignore[override]
+    def __call__(self, *args, **kwargs) -> float:
         return self.value
 
 
@@ -88,6 +88,14 @@ def _parse_exchange(data: dict) -> BSocialExchangeTemplate:
 
 
 def load_exchange_templates(path: str) -> List[BSocialExchangeTemplate]:
+    import os
+
+    if not os.path.isabs(path) and not os.path.exists(path):
+        base = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        alt = os.path.normpath(os.path.join(base, "configs", os.path.basename(path)))
+        if os.path.exists(alt):
+            path = alt
+
     with open(path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f) or []
     if not isinstance(data, list):

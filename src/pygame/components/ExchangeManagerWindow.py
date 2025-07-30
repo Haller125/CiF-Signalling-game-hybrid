@@ -24,7 +24,6 @@ class ExchangeManagerWindow(IComponent):
     font: pygame.font.Font = field(init=False)
     column: Column = field(init=False)
     load_button: Button = field(init=False)
-    delete_button: Button = field(init=False)
     name_input: InputBox = field(init=False)
     text_input: InputBox = field(init=False)
     close_button: Button = field(init=False)
@@ -77,14 +76,6 @@ class ExchangeManagerWindow(IComponent):
             "Load from YAML",
             on_click=self.load_exchanges,
         )
-        self.delete_button = Button(
-            self.x + column_w + 10,
-            btn_y + (btn_h + 5) + top_padding,
-            btn_w,
-            btn_h,
-            "Delete",
-            on_click=self.delete_selected,
-        )
         close_x = self.x + self.width - btn_w - 10
         self.close_button = Button(
             close_x,
@@ -128,8 +119,39 @@ class ExchangeManagerWindow(IComponent):
         self.precond_label_y = top_y + d_btwn * 3
 
     def load_exchanges(self):
-        # TODO: Add loading from YAML
-        pass
+        import os
+        from src.social_exchange.exchange_loader import load_exchange_templates
+
+        try:
+            root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+            path = os.path.join(root, "configs", "exchanges_example.yaml")
+            templates = load_exchange_templates(path)
+        except Exception as exc:
+            logging.error(f"Failed to load exchanges: {exc}")
+            return
+
+        self.model.actions = templates
+        self.column.items = [ex.name for ex in self.model.actions]
+        self.column.recalculate_scroll()
+
+        if self.model.actions:
+            self.column.selected_index = 0
+            self.selected_index = 0
+            tpl = self.model.actions[0]
+            self.name_input.text = tpl.name
+            self.text_input.text = tpl.text
+            try:
+                self.intent_dropdown.selected_index = self.model.relationships.index(
+                    tpl.intent.subtype
+                )
+            except ValueError:
+                self.intent_dropdown.selected_index = None
+        else:
+            self.column.selected_index = None
+            self.selected_index = None
+            self.name_input.text = ""
+            self.text_input.text = ""
+            self.intent_dropdown.selected_index = None
 
     def refresh_dropdown(self):
         self.intent_dropdown.options = list(self.model.relationships)
@@ -146,20 +168,6 @@ class ExchangeManagerWindow(IComponent):
         if self.on_close:
             self.on_close()
 
-    def delete_selected(self):
-        idx = self.column.get_selected_index()
-        if idx is None:
-            return
-        try:
-            del self.model.actions[idx]
-        except Exception as exc:
-            logging.error(f"Delete exchange error: {exc}")
-        self.column.items = [ex.name for ex in self.model.actions]
-        self.column.selected_index = None
-        self.selected_index = None
-        self.name_input.text = ""
-        self.text_input.text = ""
-
     def handle_event(self, event):
         if not self.visible:
             return
@@ -174,8 +182,14 @@ class ExchangeManagerWindow(IComponent):
                     return
         self.column.handle_event(event)
         self.load_button.handle_event(event)
-        self.delete_button.handle_event(event)
         self.close_button.handle_event(event)
+
+        self.selected_index = self.column.get_selected_index()
+        if self.selected_index is not None:
+            tpl = self.model.actions[self.selected_index]
+            self.name_input.text = tpl.name
+            self.text_input.text = tpl.text
+            self.intent_dropdown.selected_index = self.model.relationships.index(tpl.intent.subtype) if tpl.intent.subtype in self.model.relationships else None
 
     def draw(self, surface):
         if not self.visible:
@@ -184,7 +198,6 @@ class ExchangeManagerWindow(IComponent):
         pygame.draw.rect(surface, (40, 40, 40), rect)
         self.column.draw(surface)
         self.load_button.draw(surface)
-        self.delete_button.draw(surface)
         self.close_button.draw(surface)
         self.name_input.draw(surface)
         self.text_input.draw(surface)
