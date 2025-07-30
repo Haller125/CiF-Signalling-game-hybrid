@@ -23,7 +23,7 @@ class ExchangeManagerWindow(IComponent):
 
     font: pygame.font.Font = field(init=False)
     column: Column = field(init=False)
-    add_button: Button = field(init=False)
+    load_button: Button = field(init=False)
     delete_button: Button = field(init=False)
     name_input: InputBox = field(init=False)
     text_input: InputBox = field(init=False)
@@ -69,13 +69,13 @@ class ExchangeManagerWindow(IComponent):
         column_w = self.column_w
         btn_y = self.y
         top_padding = 10
-        self.add_button = Button(
+        self.load_button = Button(
             self.x + column_w + 10,
             btn_y + top_padding,
             btn_w,
             btn_h,
-            "Add",
-            on_click=self.start_add,
+            "Load from YAML",
+            on_click=self.load_exchanges,
         )
         self.delete_button = Button(
             self.x + column_w + 10,
@@ -127,7 +127,7 @@ class ExchangeManagerWindow(IComponent):
         )
         self.precond_label_y = top_y + d_btwn * 3
 
-    def start_add(self):
+    def load_exchanges(self):
         # TODO: Add loading from YAML
         pass
 
@@ -173,7 +173,7 @@ class ExchangeManagerWindow(IComponent):
                     dd.handle_event(event)
                     return
         self.column.handle_event(event)
-        self.add_button.handle_event(event)
+        self.load_button.handle_event(event)
         self.delete_button.handle_event(event)
         self.close_button.handle_event(event)
 
@@ -183,7 +183,7 @@ class ExchangeManagerWindow(IComponent):
         rect = pygame.Rect(self.x, self.y, self.width, self.height)
         pygame.draw.rect(surface, (40, 40, 40), rect)
         self.column.draw(surface)
-        self.add_button.draw(surface)
+        self.load_button.draw(surface)
         self.delete_button.draw(surface)
         self.close_button.draw(surface)
         self.name_input.draw(surface)
