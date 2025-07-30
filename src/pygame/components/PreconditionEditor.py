@@ -18,6 +18,8 @@ class PreconditionEditor(IComponent):
     set_confirm_y: Callable[[int], None]
     font: pygame.font.Font = field(init=False)
     dropdowns: List[Tuple[Dropdown, Dropdown]] = field(init=False, default_factory=list)
+    base_y: int = field(init=False)
+    scroll_offset: int = field(init=False, default=0)
     label: str = "Preconditions"
 
     PRECOND_TYPES = ["Has", "Has not", "Const"]
@@ -25,6 +27,7 @@ class PreconditionEditor(IComponent):
     def __post_init__(self):
         pygame.font.init()
         self.font = pygame.font.SysFont(None, 20)
+        self.base_y = self.y
 
     def _predicate_options(self) -> List[str]:
         return [f"trait:{t}" for t in self.model.traits] + [f"relationship:{r}" for r in self.model.relationships]
@@ -74,6 +77,11 @@ class PreconditionEditor(IComponent):
 
         ok_y = start_y + len(tpl.preconditions) * (height + spacing) + 5
         self.set_confirm_y(ok_y)
+
+    def set_scroll(self, offset: int):
+        self.scroll_offset = offset
+        self.y = self.base_y - offset
+        self.refresh()
 
     def get_active_dropdowns(self) -> List[Dropdown]:
         active: List[Dropdown] = []

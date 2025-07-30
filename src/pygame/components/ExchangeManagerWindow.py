@@ -42,6 +42,14 @@ class ExchangeManagerWindow(IComponent):
     selected_index: Optional[int] = field(init=False, default=None)
     on_close: Optional[callable] = field(default=None, repr=False)
 
+    scroll_offset: int = field(init=False, default=0)
+    max_scroll: int = field(init=False, default=0)
+    scroll_speed: int = 20
+    intent_dropdown_y0: int = field(init=False, default=0)
+    name_input_y0: int = field(init=False, default=0)
+    text_input_y0: int = field(init=False, default=0)
+    precond_editor_y0: int = field(init=False, default=0)
+
     def __post_init__(self):
         pygame.font.init()
         self.font = pygame.font.SysFont(None, 20)
@@ -64,6 +72,11 @@ class ExchangeManagerWindow(IComponent):
             self.intent_dropdown.selected_index = 0
 
         self.precond_editor.refresh()
+        self.intent_dropdown_y0 = self.intent_dropdown.y
+        self.name_input_y0 = self.name_input.y
+        self.text_input_y0 = self.text_input.y
+        self.precond_editor_y0 = self.precond_editor.y
+        self._update_scroll_limits()
 
     def _init_column(self):
         self.column_w = self.width // 3
@@ -175,6 +188,8 @@ class ExchangeManagerWindow(IComponent):
         else:
             self.intent_dropdown.selected_index = None
         self.precond_editor.refresh()
+        self._update_scroll_limits()
+        self._apply_scroll()
 
     def refresh_dropdown(self):
         self.intent_dropdown.options = list(self.model.relationships)
@@ -191,8 +206,24 @@ class ExchangeManagerWindow(IComponent):
         self.text_input.text = ""
         self.intent_dropdown.selected_index = None
         self.precond_editor.refresh()
-        if self.on_close:
-            self.on_close()
+        self._update_scroll_limits()
+        self._apply_scroll()
+
+    def _update_scroll_limits(self):
+        num_preconds = 0
+        if self.selected_index is not None and self.selected_index < len(self.model.actions):
+            num_preconds = len(self.model.actions[self.selected_index].preconditions)
+        height = 25
+        spacing = 5
+        bottom = self.precond_editor_y0 + num_preconds * (height + spacing) + 5 + self.confirm_button.height
+        self.max_scroll = max(0, bottom - (self.y + self.height))
+        self.scroll_offset = min(self.scroll_offset, self.max_scroll)
+
+    def _apply_scroll(self):
+        self.intent_dropdown.y = self.intent_dropdown_y0 - self.scroll_offset
+        self.name_input.y = self.name_input_y0 - self.scroll_offset
+        self.text_input.y = self.text_input_y0 - self.scroll_offset
+        self.precond_editor.set_scroll(self.scroll_offset)
 
     def start_edit(self):
         idx = self.column.get_selected_index()
@@ -211,6 +242,8 @@ class ExchangeManagerWindow(IComponent):
             self.intent_dropdown.selected_index = None
         self.selected_index = idx
         self.precond_editor.refresh()
+        self._update_scroll_limits()
+        self._apply_scroll()
 
     def delete_selected(self):
         idx = self.column.get_selected_index()
@@ -226,6 +259,8 @@ class ExchangeManagerWindow(IComponent):
         self.name_input.text = ""
         self.text_input.text = ""
         self.precond_editor.refresh()
+        self._update_scroll_limits()
+        self._apply_scroll()
 
     def confirm_edit(self):
         name = self.name_input.text.strip()
@@ -278,6 +313,20 @@ class ExchangeManagerWindow(IComponent):
                 if dd.menu_rect().collidepoint(mx, my):
                     dd.handle_event(event)
                     return
+
+        if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEWHEEL):
+            mx, my = event.pos if hasattr(event, "pos") else pygame.mouse.get_pos()
+            if self.x + self.column_w <= mx <= self.x + self.width and self.y <= my <= self.y + self.height:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button in (4, 5):
+                    delta = -self.scroll_speed if event.button == 4 else self.scroll_speed
+                    self.scroll_offset = max(0, min(self.scroll_offset + delta, self.max_scroll))
+                    self._apply_scroll()
+                    return
+                elif event.type == pygame.MOUSEWHEEL:
+                    delta = -event.y * self.scroll_speed
+                    self.scroll_offset = max(0, min(self.scroll_offset + delta, self.max_scroll))
+                    self._apply_scroll()
+                    return
         prev_selected = self.column.get_selected_index()
         self.column.handle_event(event)
         if not self.editing:
@@ -296,12 +345,16 @@ class ExchangeManagerWindow(IComponent):
                     self.intent_dropdown.selected_index = None
                 self.refresh_dropdown()
                 self.precond_editor.refresh()
+                self._update_scroll_limits()
+                self._apply_scroll()
             elif idx is None:
                 self.selected_index = None
                 self.name_input.text = ""
                 self.text_input.text = ""
                 self.intent_dropdown.selected_index = None
                 self.precond_editor.refresh()
+                self._update_scroll_limits()
+                self._apply_scroll()
         self.add_button.handle_event(event)
         self.edit_button.handle_event(event)
         self.delete_button.handle_event(event)
@@ -324,6 +377,7 @@ class ExchangeManagerWindow(IComponent):
         self.edit_button.draw(surface)
         self.delete_button.draw(surface)
         self.close_button.draw(surface)
+        surface.set_clip(rect)
         self.name_input.draw(surface)
         self.text_input.draw(surface)
         self.intent_dropdown.draw(surface)
@@ -336,6 +390,8 @@ class ExchangeManagerWindow(IComponent):
 
         active = self.precond_editor.draw(surface, self.editing)
         open_menus.extend(active)
+
+        surface.set_clip(None)
 
         for dd in open_menus:
             dd.draw(surface)
