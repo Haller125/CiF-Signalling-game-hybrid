@@ -39,9 +39,9 @@ class BSocialExchangeTemplate:
 def make_template():
     tmpl = PredicateTemplate('relationship', 'ally', False)
     rule = BRule(name='r', condition=[DummyCondition(1.0)], weight=1.0)
-    irs = BInfluenceRuleSet(name='irs', rules=[rule])
+    irs = BInfluenceRuleSet(name='irs', rules=[rule, rule, rule, rule, rule, rule])
     effects = BExchangeEffects([], [])
-    preconditions = [DummyCondition(1.0)]  # Placeholder for actual conditions
+    preconditions = [DummyCondition(1.0), DummyCondition(1.0), DummyCondition(1.0)]  # Placeholder for actual conditions
     return BSocialExchangeTemplate(
         name='ally_request',
         preconditions=preconditions,  # Using the first condition as a placeholder
@@ -54,7 +54,7 @@ def make_template():
 
 class DummyCondition(BHasCondition):
     def __init__(self, value: float = 1.0):
-        super().__init__(req_predicate=PredicateTemplate('trait', 'dummy', True))
+        super().__init__(req_predicate=PredicateTemplate('relationship', 'ally', True))
         self.value = value
 
     def __call__(self, *args, **kwargs) -> float:
