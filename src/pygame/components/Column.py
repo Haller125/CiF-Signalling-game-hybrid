@@ -64,7 +64,6 @@ class Column(IComponent):
         rect = pygame.Rect(self.x, self.y, self.width, self.height)
         pygame.draw.rect(surface, self.bg_color, rect)
         surface.set_clip(rect)
-        # draw filtered items
         y_off = self.y - self.scroll_offset + self.padding
         render_items = [item for item in self.items if item not in self.exclude_items]
 
