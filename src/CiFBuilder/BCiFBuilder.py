@@ -4,7 +4,7 @@ from random import random, shuffle
 from typing import Dict, List, Sequence
 
 from src.CiF.BCiF import BCiF
-from src.names.names import Names
+from src.NamesDB.NamesDB import Names
 from src.npc.BNPC import BNPC
 from src.predicates.PredicateTemplate import PredicateTemplate
 from src.social_exchange.BSocialExchangeTemplate import BSocialExchangeTemplate
@@ -24,7 +24,7 @@ class CiFBuilder:
 
     def build(self):
         if len(self.names) < self.n:
-            raise ValueError("Not enough names provided for the number of NPCs.")
+            raise ValueError("Not enough NamesDB provided for the number of NPCs.")
         if len(self.traits) == 0:
             raise ValueError("At least one trait must be provided.")
         if len(self.relationships) == 0:

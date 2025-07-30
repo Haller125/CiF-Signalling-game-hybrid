@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     # 2. Run exactly the piece you want to measure
     #    e.g. build everything once (or loop a few times for stability)
-    bt, it, mem = run_builder(30, 30, 30, n_npcs=20)
+    bt, it, mem = run_builder(50, 50, 50, n_npcs=50)
 
     pr.disable()
 
@@ -75,5 +75,5 @@ if __name__ == '__main__':
     s = io.StringIO()
     ps = pstats.Stats(pr, stream=s)
     # sort by cumulative time; you can also sort by 'cumtime'
-    ps.strip_dirs().sort_stats('cumtime').print_stats(20)
+    ps.strip_dirs().sort_stats('tottime').print_stats(20)
     print(s.getvalue())

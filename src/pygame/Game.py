@@ -50,7 +50,7 @@ class Game:
         topbar = TopBar(width=self.window.width, height=self.window.height // 5)
         btn_w, btn_h = 80, topbar.height - 10
         spacing = 10
-        num_buttons = 5
+        num_buttons = 6
         x_start = topbar.width - (btn_w * num_buttons + spacing * (num_buttons + 3))
         buttons = [
 
@@ -59,7 +59,9 @@ class Game:
             Button(x=x_start + 3 * spacing + 2 * btn_w, y=5, width=btn_w, height=btn_h, text="Traits", on_click=self.toggle_traits_manager),
             Button(x=x_start + 4 * spacing + 3 * btn_w, y=5, width=btn_w, height=btn_h, text="Relationships", on_click=self.toggle_relationships_manager),
             Button(x=x_start + 5 * spacing + 4 * btn_w, y=5, width=btn_w, height=btn_h, text="Exchanges",
-                   on_click=self.toggle_exchange_manager)
+                   on_click=self.toggle_exchange_manager),
+            Button(x=x_start + 6 * spacing + 5 * btn_w, y=5, width=btn_w, height=btn_h, text="Save",
+                   on_click=self.save_prompt)
         ]
         topbar.buttons = buttons
         self.window.add_object(topbar)
@@ -188,6 +190,28 @@ class Game:
         else:
             for w in self.main_window_components:
                 w.disabled = True
+
+    def save_prompt(self) -> None:
+        import os
+        import tkinter as tk
+        from tkinter import filedialog, messagebox
+
+        root = tk.Tk()
+        root.withdraw()
+        saves_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "saves")
+        os.makedirs(saves_dir, exist_ok=True)
+        path = filedialog.asksaveasfilename(
+            initialdir=saves_dir,
+            defaultextension=".sav",
+            title="Save Game"
+        )
+        root.destroy()
+        if not path:
+            return
+        try:
+            self.save(path)
+        except Exception as exc:
+            messagebox.showerror("Error", f"Failed to save game: {exc}")
 
     def check_is_main_available(self):
         res = [not window.visible for window in self.overlapping_windows]
