@@ -180,7 +180,7 @@ class ExchangeManagerWindow(IComponent):
         self.intent_dropdown.options = list(self.model.relationships)
         self.intent_dropdown.scroll_offset = 0
         self.intent_dropdown.selected_index = None if self.intent_dropdown.options is None else (
-                    self.intent_dropdown.selected_index or 0)
+                self.intent_dropdown.selected_index or 0)
 
     def close_window(self):
         self.editing = False
